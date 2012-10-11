@@ -1,5 +1,5 @@
 capacity = read.csv("eurostat-nrg_113a_capacity-wind-MW.csv")
-production = read.csv("eurostat-nrg_1072_production-wind-GWh.csv")
+production = read.csv("eurostat-nrg_1072_production-wind-GWh.csv") # this is in GWh so late we have to multiply with 1000 to get it in MWh.
 pdf(file="figure_generation-capacity.pdf", height=3.5, width=5)
 #par(mar=c(4.2, 3.8, 0.2, 0.2)) #Trim margins
 plot(production$Germany*1000/capacity$Germany, type="l", ylim=range(0,3000), axes=F, ann=T, xlab="Years", ylab="MWh / MW", cex.lab=0.8, lwd=2)
