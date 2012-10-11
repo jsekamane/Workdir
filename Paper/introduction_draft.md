@@ -59,3 +59,10 @@ Supplement the policy evaluation with a survey among LT project developers, that
 
 ## Structure of paper
 The paper is structured as follows …
+
+
+* Comparing installed capacity
+* Comparing wind resources (Generation from installed capacity)
+* Then "Expected average remuneration under the EEG and the RO.", since the ROC price from years 2002-2006 is used in fig. 1.
+* … 
+* And last the "Anticipated price of wind energy in Germany and the UK" 
