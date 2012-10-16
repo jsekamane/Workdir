@@ -10,7 +10,6 @@
 capacity = read.csv("eurostat-nrg_113a_capacity-wind-MW.csv")
 production = read.csv("eurostat-nrg_1072_production-wind-GWh.csv") # this is in GWh so late we have to multiply with 1000 to get it in MWh.
 pdf(file="figure_generation-capacity.pdf", height=3.5, width=5)
-#par(mar=c(4.2, 3.8, 0.2, 0.2)) #Trim margins
 plot(production$Germany*1000/capacity$Germany, type="l", ylim=range(0,3000), axes=F, ann=T, xlab="Years", ylab="MWh / MW", cex.lab=0.8, lwd=2)
 axis(1, lab=F) #disable labels on x-axis
 axis(1, at=1:21, lab=capacity$X, cex.axis=0.7)
@@ -22,4 +21,3 @@ title(main="Generation from installed capacity (MWh/MW)")
 mtext("1990-2010");
 legend("topleft", names(capacity[-1]), cex=0.8, lty=1:3, lwd=2, bty="n");
 dev.off()
-#par(mar=c(5, 4, 4, 2) + 0.1) #Reset standart margins
