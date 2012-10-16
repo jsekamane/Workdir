@@ -1,3 +1,12 @@
+####################
+#
+#	Title: Generation from installed capacity (MWh/MW)
+#	Source: Eurostat (nrg_113a, nrg_1072)
+#	Notes: Onshore and offshore wind turbines
+#
+####################
+
+
 capacity = read.csv("eurostat-nrg_113a_capacity-wind-MW.csv")
 production = read.csv("eurostat-nrg_1072_production-wind-GWh.csv") # this is in GWh so late we have to multiply with 1000 to get it in MWh.
 pdf(file="figure_generation-capacity.pdf", height=3.5, width=5)

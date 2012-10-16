@@ -1,3 +1,12 @@
+####################
+#
+#	Title: Installed capacity (MW)
+#	Source: Eurostat (nrg_113a)
+#	Notes: Onshore and offshore wind turbines
+#
+####################
+
+
 capacity = read.csv("eurostat-nrg_113a_capacity-wind-MW.csv")
 pdf(file="figure_capacity.pdf", height=3.5, width=5)
 #par(mar=c(4.2, 3.8, 0.2, 0.2)) #Trim margins
