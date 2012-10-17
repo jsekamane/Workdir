@@ -17,6 +17,11 @@ axis(2, las=1, cex.axis=0.8)
 box()
 lines(x=c(15:21),y=production$Lithuania[15:21]/totalproduction$Lithuania[15:21]*100, type="l", lty=2, lwd=2)
 lines(production$United.Kingdom/totalproduction$United.Kingdom*100, type="l", lty=3, lwd=2)
+
+text(21, production$Germany[21]/totalproduction$Germany[21]*100, paste(format(production$Germany[21]/totalproduction$Germany[21]*100,digits=2,nsmall=1),"%"), cex=0.6, pos=3)
+text(21, production$Lithuania[21]/totalproduction$Lithuania[21]*100, paste(format(production$Lithuania[21]/totalproduction$Lithuania[21]*100,digits=2,nsmall=1),"%"), cex=0.6, pos=3)
+text(21, production$United.Kingdom[21]/totalproduction$United.Kingdom[21]*100, paste(format(production$United.Kingdom[21]/totalproduction$United.Kingdom[21]*100,digits=2,nsmall=1),"%"), cex=0.6, pos=1)
+
 title(main="Wind power share of total generation (%)")
 mtext("1990-2010");
 legend("topleft", names(capacity[-1]), cex=0.8, lty=1:3, lwd=2, bty="n");
