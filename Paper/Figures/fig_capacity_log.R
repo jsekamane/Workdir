@@ -2,7 +2,7 @@
 #
 #  Title: Installed log-capacity (log-MW)
 #	Source: Eurostat (nrg_113a)
-#	Notes: Onshore and offshore wind turbines
+#	Notes: Onshore and offshore wind turbines. Sum of main activity producers and autoproducers
 #
 ####################
 
@@ -27,7 +27,7 @@ text(21, capacity$United.Kingdom[21], paste(capacity$United.Kingdom[21],"MW"), c
 #adding labels at begining
 text(1, capacity$Germany[1], paste(capacity$Germany[1],"MW"), cex=0.6, pos=1)
 text(15, capacity$Lithuania[15], paste(capacity$Lithuania[15],"MW"), cex=0.6, pos=3)
-text(1, capacity$United.Kingdom[1], paste(capacity$United.Kingdom[14],"MW"), cex=0.6, pos=1)
+text(1, capacity$United.Kingdom[1], paste(capacity$United.Kingdom[1],"MW"), cex=0.6, pos=1)
 
 title(main="Installed log-capacity (log-MW)")
 mtext("1990-2010");
