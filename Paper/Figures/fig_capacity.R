@@ -2,7 +2,7 @@
 #
 #	Title: Installed capacity (MW)
 #	Source: Eurostat (nrg_113a)
-#	Notes: Onshore and offshore wind turbines
+#	Notes: Onshore and offshore wind turbines. Sum of main activity producers and autoproducers
 #
 ####################
 

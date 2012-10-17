@@ -2,7 +2,7 @@
 #
 #	Title: Generation from installed capacity (MWh/MW)
 #	Source: Eurostat (nrg_113a, nrg_1072)
-#	Notes: Onshore and offshore wind turbines
+#	Notes: Onshore and offshore wind turbines. Sum of main activity producers and autoproducers
 #
 ####################
 
