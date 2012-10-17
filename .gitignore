@@ -11,9 +11,9 @@ Thumbs.db
 
 # RStudio files # 
 ######################
-*/.RData
-*/.Rapp.history
-*/.Rhistory
+*.RData
+*.Rapp.history
+*.Rhistory
 */.Rproj.user/*
 
 Paper/Figures/.RData
@@ -33,3 +33,25 @@ Paper/Figures/.Rproj.user/724EF957/sdb/per/t/C218439B
 *.pper
 
 Paper/Figures/.Rproj.user/724EF957/pcs/workbench-pane.pper
+
+*.history
+
+Paper/Figures/.Rproj.user/724EF957/sdb/per/t/14086459
+
+Paper/Figures/.Rproj.user/724EF957/sdb/per/t/8F7CDB7D
+
+Paper/Figures/.Rproj.user/724EF957/sdb/per/t/B20A9388
+
+Paper/Figures/.Rproj.user/724EF957/sdb/per/t/FD279A12
+
+Paper/Figures/.Rproj.user/724EF957/sdb/prop/16C1252D
+
+Paper/Figures/.Rproj.user/724EF957/sdb/prop/7338D0B7
+
+Paper/Figures/.Rproj.user/724EF957/sdb/prop/A269D05
+
+Paper/Figures/.Rproj.user/724EF957/sdb/prop/AB93E6AC
+
+Paper/Figures/.Rproj.user/724EF957/sdb/prop/E6706E45
+
+Paper/Figures/.Rproj.user/724EF957/sdb/prop/FBB01D2D
