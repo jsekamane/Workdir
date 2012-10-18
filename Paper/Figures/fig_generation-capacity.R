@@ -9,6 +9,13 @@
 
 capacity = read.csv("eurostat-nrg_113a_capacity-wind-MW.csv")
 production = read.csv("eurostat-nrg_1072_production-wind-GWh.csv") # this is in GWh so late we have to multiply with 1000 to get it in MWh.
+
+# How would it look if the numbers went rounded
+# capacity$Lithuania[15] = 0.85
+# capacity$Lithuania[16] = 0.99
+# production$Lithuania[15] = 1.2
+# production$Lithuania[16] = 1.8
+
 pdf(file="figure_generation-capacity.pdf", height=3.5, width=5)
 plot(production$Germany*1000/capacity$Germany, type="l", ylim=range(0,3000), axes=F, ann=T, xlab="Years", ylab="MWh / MW", cex.lab=0.8, lwd=2)
 axis(1, lab=F) #disable labels on x-axis
