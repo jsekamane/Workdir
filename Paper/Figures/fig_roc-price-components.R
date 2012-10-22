@@ -91,39 +91,31 @@ for(i in 6:11) {
   # I'am missing a data source ???
   # CO2.Price[[i]] = * * exchangerate$Pound.sterling[[i]]
 }
-
 # From 2013-2021: tCO2  x  €22.77/tCO2  x  Exch.Rate  = CO2-price p/KWh  ???
 for(i in 12:20) {
   # I'am missing a data source ???
   #CO2.Price[[i]] = 22.77 * exchangerate$Pound.sterling[[i]]
 }
 
+
 # Join in table
 ROC.Value = cbind(years, Buy.Out.Value, Recycled.Green.Premium, Levy.Exemption.Certificate, Energy.Value, CO2.Price, deparse.level = 1)
-colnames(ROC.Value) = c("years",1:5)
+#ROC.Value = cbind(Buy.Out.Value, Recycled.Green.Premium, Levy.Exemption.Certificate, Energy.Value, CO2.Price, deparse.level = 1)
 
-m.ROC.Value = reshape(ROC.Value, direction="long", 
-                      varying=list(names(ROC.Value)[2:6]), 
-                      v.names="Value", 
-                      idvar="NA", 
-                      timevar="Variable", 
-                      times=1:5) #times=1950:1954
-# http://stackoverflow.com/questions/2185252/reshaping-data-frame-from-wide-to-long-format
-# http://stackoverflow.com/questions/4811316/quick-help-creating-a-stacked-bar-chart-ggplot2
-# http://stackoverflow.com/questions/7583432/plot-stacked-bar-plot-in-r
+# Transform to long format
+m.ROC.Value = melt(as.data.frame(ROC.Value), measure.vars = 2:6)
+#m.ROC.Value = melt(ROC.Value)
+#m.ROC.Value = cbind(m.ROC.Value, m.ROC.Value$Var1 + rep(2001, 100)) # work around to add years propperly
+#colnames(m.ROC.Value) = c("id", "variable", "value", "years")
 
-#barplot(ROC.Value, xlab="Years", ylab="p/KWh") # , legend = rownames(ROC.Value) col=c("darkblue","red")
-
-#pdf(file="figure_roc-price-components.pdf", height=3.5, width=5)
-#plot(capacity$Germany, type="l", ylim=range(0,28000), axes=F, ann=T, xlab="Years", ylab="p/KWh", cex.lab=0.8, lwd=2)
-#axis(1, lab=F) #disable labels on x-axis
-#axis(1, at=1:21, lab=years, cex.axis=0.7)
-#axis(2, las=1, cex.axis=0.8)
-#box()
-#lines(x=c(15:21), y=capacity$Lithuania[15:21], type="l", lty=2, lwd=2) # only plot line from 2004
-#lines(capacity$United.Kingdom, type="l", lty=3, lwd=2)
-
-#title(main="Components of the Price Paid to Wind Energy under ROC (2002 - 2021)")
-#mtext("2002-2021");
-#legend("topleft", names(capacity[-1]), cex=0.8, lty=1:3, lwd=2, bty="n");
-#dev.off()
+# Plot stacked barplot
+ggplot(m.ROC.Value, aes(x=factor(years), y=value, fill=factor(variable)) ) + 
+  geom_bar(position="stack") + 
+  ylab("p/KWh") + 
+  xlab("Years") +
+  labs(fill="", title="Components of the Price Paid to Wind Energy under ROC (2002 - 2021)") +
+  coord_cartesian(ylim = c(0, 8)) +
+  theme_bw() +
+  theme(legend.position="top")
+  #theme(axis.text.x = element_text(size = 8))
+ggsave("figure_roc-price-components.pdf")
