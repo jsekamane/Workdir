@@ -1,7 +1,7 @@
 ####################
 #
 #  Title: Average wind speeds
-#	 Source: UK: Butler and Neuhoff (2004, p. 13). DE: IEA (2000, p. 96). LT: Marciukatis (2011), 
+#	 Source: UK: Butler and Neuhoff (2004, p. 13). DE: IEA (2000, p. 96). LT: Marciukatis (2011), Erlickytė-Marčiukaitienė, Marčiukaitis and Tumosa (2007, p. 27)
 #	 Notes: Onshore and offshore wind turbines. Sum of main activity producers and autoproducers
 #
 ####################
@@ -16,7 +16,11 @@ DE.30m = 5.5 # m/s
 LT.V.43m = 5.94
 LT.K.27.5m = 6
 LT.T.28m = 6.4
-
+# Nustatyta, kad 1995–2003 m. vidutinis vėjo greitis 50 m aukštyje Giruliuose siekė 6,4 m/s.
+LT.50m = 6.4
+# Pirmieji vėjo greičio ir krypties matavimo duomenų tyrimai buvo atliekami remiantis hidrometeorologijos stočių matavimo duomenimis 10 m aukštyje virš žemės paviršiaus 
+# Pa- gal šį žemėlapį didžiausias vėjo energijos potencialas (> 5,5 m/s) yra Lietuvos pajūryje, o mažiausias (< 2,5 m/s) – Rytų ir Pietry- čių Lietuvoje.
+LT.costal.10m = 5.5
 
 # CALCULATING THE HELLMAN EXPONENT
 # used in Butler and Neuhoff (2004): 
@@ -44,6 +48,10 @@ LT.V.30m = V(LT.V.43m, 43, 30)
 LT.K.30m = V(LT.K.27.5m, 27.5, 30)
 LT.T.30m = V(LT.T.28m, 28, 30)
 LT.testsites.avg.30m = mean(c(LT.V.30m, LT.K.30m, LT.T.30m))
+
+LT.30m = V(LT.50m, 50, 30)
+
+LT.costal.30m = V(LT.costal.10m, 10, 30)
 
 # PRESENTATION:
 
