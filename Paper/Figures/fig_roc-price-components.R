@@ -1,7 +1,8 @@
 ####################
 #
-#	Title: Components of the Price Paid to Wind Energy under ROC (2002 - 2021)
-#	Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). Data sources: EUROSTAT (sts_inppgr_a, ert_bil_eur_a, env_air_gge)
+#	Title: Components of the Price Paid to Wind Energy under ROC (2002 - 2020)
+#	Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). 
+# Data sources: EUROSTAT (sts_inppgr_a, ert_bil_eur_a). Ofgem (2004, p. 23-24. 2008, Table 1-3. 2012, Table 1-3). IFS (2012). NFPA (2012). e-ROC (2012). Defra / DECC (2012, table 4). BlueNext (2012).
 #	Notes: 
 # Units: p/KWh = £0.01/KWh = £ 1/100 /KWh
 #
@@ -10,13 +11,28 @@
 library(ggplot2)
 library(reshape2)
 
-# Load data
-ppi = read.csv("eurostat-sts_inppgr_a_producerpriceindex.csv")
-exchangerate = read.csv("eurostat-ert_bil_eur_a_exchangerate.csv")
-co2 = read.csv("eurostat-env_air_gge_co2.csv") # in thousands of tonnes
+# LOAD THE DATA
+# Buy.Out.Value
+data.ppi = read.csv("eurostat-sts_inppgr_a_producerpriceindex.csv")
+# Recycled.Green.Premium
+data.buyout.fund = read.csv("ofgem_buyout-fund.csv") # in p/KWh # in halfyear terms
+# Levy.Exemption.Certificate
+data.climate.change.levy = read.csv("ifs_climate-change-levy.csv") # in p/KWh # in halfyear terms
+# Energy.Value
+data.wind.auction = read.csv("nfpa_wind-auction.csv") # in p/KWh
+data.roc.auction = read.csv("eroc_roc-auction.csv") # in £/MWh
+# CO2.Price
+data.exchangerate = read.csv("eurostat-ert_bil_eur_a_exchangerate.csv")
+#data.co2.emission = read.csv("eurostat-env_air_gge_co2.csv") # in thousands of tonnes
+data.co2.conversion.factor = read.csv("DECC_CO2-conversion-factor.csv") # in kgCO2e / kWh
+data.co2.avg.spot.price = read.csv("bluenext_co2price-avg-year.csv") # in €/tCO2
 
-# Time range
-years = c(2002:2021)
+# Sorting data
+data.co2.avg.spot.price = data.co2.avg.spot.price[ order(data.co2.avg.spot.price[,2]), ]
+
+
+# Time range - dividing between 31. Dec and 1. Jan.
+years = c(2002:2021) # 2002, 2003, ... , 2021
 
 # Creating empty components that we will fill content into later
 Buy.Out.Value = rep(NA, 20)
@@ -34,7 +50,7 @@ CO2.Price = rep(NA, 20)
 Buy.Out.Value[1] = 30/1000 *100 # p/KWh
 for(i in 2:9) {
   #Buy.Out.Value[[i]] = Buy.Out.Value[[i-1]] * 1.02 # ??? % annual increase
-  Buy.Out.Value[[i]] = Buy.Out.Value[[i-1]] * (1 + ppi$United.Kingdom[5+i]/100) # change with producer price index ???
+  Buy.Out.Value[[i]] = Buy.Out.Value[[i-1]] * (1 + data.ppi$United.Kingdom[5+i]/100) # change with producer price index ???
 }
 # From 2010-2021: Falls with 1/5 p/KWh annually (falls with technology)
 for(i in 10:20) {
@@ -46,7 +62,18 @@ for(i in 10:20) {
 # Recycled Green Premium
 #####
 
-# I'am missing a data source ???
+# Halfyear values: 2002 will be set to 2002/2003 value. The remaining will be averages across this period and previous period.
+Recycled.Green.Premium[1] = data.buyout.fund$Redestributed[1]
+for(i in 2:9) {
+  Recycled.Green.Premium[[i]] = mean(c(data.buyout.fund$Redestributed[[i-1]],data.buyout.fund$Redestributed[[i]]))
+}
+# we assume a high rate of renewable build such that the renewables target is met by ... 2015 ... and the recycled premium falls to zero.
+# Maybe make different assumption - on the other hand this will be a lower bound estimation of price.
+Recycled.Green.Premium[14:20] = 0
+for(i in 10:13) {
+  Recycled.Green.Premium[[i]] = Recycled.Green.Premium[[i-1]] - (Recycled.Green.Premium[9]-Recycled.Green.Premium[14])/5
+}
+
 
 
 #####
@@ -55,23 +82,32 @@ for(i in 10:20) {
 
 # Assume: generators are able to negotiate 50% of the LEC value. 
 # Remains constant to its current level of 0.44 p/kWh (so 50% is 0.22 p/kWh).
-Levy.Exemption.Certificate[1:20] = 0.22 # p/KWh
+# Levy.Exemption.Certificate[1:20] = 0.22 # p/KWh
+
+# Alternatively don't make assumtion, but use real data/rate:
+# Halfyear values: Years will be set to first year in range, e.g. 2002 will be set to 2002-03, 2003 will be set to 2003-04.
+Levy.Exemption.Certificate[1] = data.climate.change.levy$Electricity[2]
+for(i in 2:9) {
+  Levy.Exemption.Certificate[[i]] = data.climate.change.levy$Electricity[[i+1]]
+}
+# Assumption from 2010 and onwards: Fairly stable so far, therefore we wil assume that it will continue to be at the 2010 level.
+Levy.Exemption.Certificate[10:20] = data.climate.change.levy$Electricity[10]
 
 
 #####
 # Energy Value
 #####
 
-# Data source NFPA auctions ???
-# Energy Value = Price of energy including ROC and LEC - (Price of ROC + Price of LEC) ???
-for(i in 1:9) {
-  # I'am missing a data source ???
+# Energy Value = Auction price of wind energy including ROC and LEC - (Auction price of ROC + Price of LEC)
+# 2002-2012.
+for(i in 1:11) {
+  # wind auction started in 2001. roc auction is in £/MWh.
+  Energy.Value[[i]] = data.wind.auction$Average.price[[i+1]] - (data.roc.auction$Average.price[[i]]*100/1000 + Levy.Exemption.Certificate[[i]])
 }
-# Falls with technology ??? - Fall to 1.5p/KWh in 2020
-Energy.Value[9] = 3 # Last observation - Just something until we have data ???
-Energy.Value[19:20] = 1.5 #p/KWH in 2020 and 2021
-for(i in 10:18) {
-  Energy.Value[[i]] = Energy.Value[[i-1]] - (Energy.Value[9] - Energy.Value[19])/(19-9)
+# Assume: falls with technology. fall to 1.5p/KWh in 2020
+Energy.Value[20] = 1.5 # p/KWH in 2020
+for(i in 12:19) {
+  Energy.Value[[i]] = Energy.Value[[i-1]] - (Energy.Value[11] - Energy.Value[20])/9
 }
 
 
@@ -81,22 +117,31 @@ for(i in 10:18) {
 
 # European Emission Trading Scheme was launched in 2005
 CO2.Price[1:3] = 0
-# From 2005-2007: tCO2  x  € ??? /tCO2  x  Exch.Rate  = CO2-price p/KWh ???
-for(i in 4:5) {
-  # I'am missing a data source ???
-  # CO2.Price[[i]] = * * exchangerate$Pound.sterling[[i]]
-}
-# From 2008-2012: tCO2  x  € ??? /tCO2  x  Exch.Rate  = CO2-price p/KWh ???
-for(i in 6:11) {
-  # I'am missing a data source ???
-  # CO2.Price[[i]] = * * exchangerate$Pound.sterling[[i]]
-}
-# From 2013-2021: tCO2  x  €22.77/tCO2  x  Exch.Rate  = CO2-price p/KWh  ???
-for(i in 12:20) {
-  # I'am missing a data source ???
-  #CO2.Price[[i]] = 22.77 * exchangerate$Pound.sterling[[i]]
+
+# Calculation:
+# CO2-price (in p/KWh) =  CO2-price (in €/tCO2)  /  Exch.Rate (from € to £)  x  100 (from £ to pennies)  x  CO2 conversion rate (from t/CO2 to KWh)
+
+# 2005-2010:
+for(i in 4:9) {
+  # Note: data.exchangerate starts in 1990. data.co2.conversion.factor starts in 1990. data.co2.conversion.factor in kgCO2e / kWh
+  CO2.Price[[i]] = data.co2.avg.spot.price$Price3[[i-3]] / data.exchangerate$Pound.sterling[[i+12]] * 100 * (data.co2.conversion.factor$Emission.Factor[[i+12]]/1000)
+  # Using fixed exchange rate of 1.5
+  #CO2.Price[[i]] = data.co2.avg.spot.price$Price3[[i-3]] * 1.5 * 100 * (data.co2.conversion.factor$Emission.Factor[[i+12]]/1000)
 }
 
+# From 2010-2020:
+# Butler and Neuhoff assume a fixed CO2 price of 22.77 euros/tCO2 form 2007 and on.
+# But since then the CO2 price has fallen from a level around the 20-22 eurto/tCO2 in 2005 and 2008, to 7.5 euro/tCO2 this seems to be a very unlikely assumption.
+# We will instead base our assumption on the Committee on Climate Change (2008, p. 162) report:
+# Their "Central case offset credit price projection" sets price at 16 euro/tCO2 in 2020, and sligthly lower in 2015.
+# We assumme a fixed cost of 16 euro/tCO2, an exchange rate of 1.5 (lower bound), using a conversion factor of 1/2 that approximates the 2010 factor.
+# This corresponds to 1.2 p/kWh (which is in identical to Butler and Neuhoff).
+CO2.Price[10:20] = 16 * 1.5 * 100 * (0.5/1000)
+
+
+#####
+# Make graph
+#####
 
 # Join in table
 ROC.Value = cbind(years, Buy.Out.Value, Recycled.Green.Premium, Levy.Exemption.Certificate, Energy.Value, CO2.Price, deparse.level = 1)
@@ -114,7 +159,8 @@ ggplot(m.ROC.Value, aes(x=factor(years), y=value, fill=factor(variable)) ) +
   ylab("p/KWh") + 
   xlab("Years") +
   labs(fill="", title="Components of the Price Paid to Wind Energy under ROC (2002 - 2021)") +
-  coord_cartesian(ylim = c(0, 8)) +
+  coord_cartesian(ylim = c(0, 14)) +
+  scale_y_continuous(breaks=c(0,2,4,6,8,10,12,14)) +
   theme_bw() +
   theme(legend.position="top")
   #theme(axis.text.x = element_text(size = 8))
