@@ -1,0 +1,4 @@
+Title: Average NFFO auction prices
+Description: The electricity prices of the renewables schemes awarded contracts under the Orders have fallen dramatically as the figures illustrate. Average Prices of NFFO Contracts.
+Note: Prices are indexed to 1998/99 price levels, and weighted according to projected output from each contract. Details of the minimum, maximum and average prices for NFFOs 3-5 can be found under the section NFFO Summary.
+Source: http://www.nfpa.co.uk/index.cfm?pid=33 (retrived 6. oct 2007)
