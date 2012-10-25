@@ -2,9 +2,9 @@
 #
 #	Title: Components of the Price Paid to Wind Energy under ROC (2002 - 2020)
 #	Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). 
-# Data sources: EUROSTAT (sts_inppgr_a, ert_bil_eur_a). Ofgem (2004, p. 23-24. 2008, Table 1-3. 2012, Table 1-3). IFS (2012). NFPA (2012). e-ROC (2012). Defra / DECC (2012, table 4). BlueNext (2012).
-#	Notes: 
-# Units: p/KWh = £0.01/KWh = £ 1/100 /KWh
+#	Data sources: EUROSTAT (sts_inppgr_a, ert_bil_eur_a). Ofgem (2004, p. 23-24. 2008, Table 1-3. 2012, Table 1-3). IFS (2012). NFPA (2012). e-ROC (2012). Defra / DECC (2012, table 4). BlueNext (2012).
+#	Notes: Recycled Green Premium (redistributed buy-out funds) are reported six months displaced: 2002/2003, 2003/2004, etc. and we have therefore been averaged. Levy Exemption Certificate (Climate Change Levy) is similarly reported, we have used first year, e.g. 2002 in 2002/2003 rate.
+#	Units: p/KWh = £0.01/KWh = £ 1/100 /KWh
 #
 ####################
 
@@ -46,11 +46,11 @@ CO2.Price = rep(NA, 20)
 # Buy Out Value
 #####
 
-# From 2002-2010: At the limit of £30/MWh in 2002/2003, increasing anually with inflation (???%).
+# From 2002-2010: At the limit of £30/MWh in 2002/2003, increasing anually with inflation (retail price index).
 Buy.Out.Value[1] = 30/1000 *100 # p/KWh
 for(i in 2:9) {
   #Buy.Out.Value[[i]] = Buy.Out.Value[[i-1]] * 1.02 # ??? % annual increase
-  Buy.Out.Value[[i]] = Buy.Out.Value[[i-1]] * (1 + data.ppi$United.Kingdom[5+i]/100) # change with producer price index ???
+  Buy.Out.Value[[i]] = Buy.Out.Value[[i-1]] * (1 + data.ppi$United.Kingdom[5+i]/100) # change with retail price index
 }
 # From 2010-2021: Falls with 1/5 p/KWh annually (falls with technology)
 for(i in 10:20) {
@@ -75,22 +75,20 @@ for(i in 10:13) {
 }
 
 
-
 #####
 # Levy Exemption Certificate
 #####
 
 # Assume: generators are able to negotiate 50% of the LEC value. 
 # Remains constant to its current level of 0.44 p/kWh (so 50% is 0.22 p/kWh).
-# Levy.Exemption.Certificate[1:20] = 0.22 # p/KWh
-
+#Levy.Exemption.Certificate[1:20] = 0.22 # p/KWh
 # Alternatively don't make assumtion, but use real data/rate:
 # Halfyear values: Years will be set to first year in range, e.g. 2002 will be set to 2002-03, 2003 will be set to 2003-04.
 Levy.Exemption.Certificate[1] = data.climate.change.levy$Electricity[2]
 for(i in 2:9) {
   Levy.Exemption.Certificate[[i]] = data.climate.change.levy$Electricity[[i+1]]
 }
-# Assumption from 2010 and onwards: Fairly stable so far, therefore we wil assume that it will continue to be at the 2010 level.
+# Assumption from 2010 and onwards: Fairly stable so far, therefore we wil assume that it will continue to be at the 2010-11 level.
 Levy.Exemption.Certificate[10:20] = data.climate.change.levy$Electricity[10]
 
 
@@ -117,10 +115,8 @@ for(i in 12:19) {
 
 # European Emission Trading Scheme was launched in 2005
 CO2.Price[1:3] = 0
-
 # Calculation:
 # CO2-price (in p/KWh) =  CO2-price (in €/tCO2)  /  Exch.Rate (from € to £)  x  100 (from £ to pennies)  x  CO2 conversion rate (from t/CO2 to KWh)
-
 # 2005-2010:
 for(i in 4:9) {
   # Note: data.exchangerate starts in 1990. data.co2.conversion.factor starts in 1990. data.co2.conversion.factor in kgCO2e / kWh
@@ -128,7 +124,6 @@ for(i in 4:9) {
   # Using fixed exchange rate of 1.5
   #CO2.Price[[i]] = data.co2.avg.spot.price$Price3[[i-3]] * 1.5 * 100 * (data.co2.conversion.factor$Emission.Factor[[i+12]]/1000)
 }
-
 # From 2010-2020:
 # Butler and Neuhoff assume a fixed CO2 price of 22.77 euros/tCO2 form 2007 and on.
 # But since then the CO2 price has fallen from a level around the 20-22 eurto/tCO2 in 2005 and 2008, to 7.5 euro/tCO2 this seems to be a very unlikely assumption.
