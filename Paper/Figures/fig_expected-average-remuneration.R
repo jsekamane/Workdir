@@ -1,85 +1,212 @@
 ####################
 #
 #	Title:  Expected Average Remuneration under the EEG and the ROC. (2002 - 2021)
-#	Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). DE: Lauber and Mez (2004)
+# Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). DE: BMU (EEG 2000, section 7. EEG 2004, article 10. EEG 2009, section 20, 29 and 30. EEG 2012, section 20, 29 and 30). Lauber and Mez (2004). LT: Marciukatis (2011), UK: [See previous calculations]
 #	Notes: 
-# Units: p/KWh = £0.01/KWh = £ 1/100 /KWh
+# Units: p/KWh and c/KWh
+# Dependencies: fig_roc-price-compontents.R (ROC.Value.csv)
 #
 ####################
 
 #library(ggplot2)
 #library(reshape2)
 
-# Load data
-#nffo.prices = read.csv("nfpa_average-NFFO-prices.csv")
-#colnames(nffo.prices) <- c("NFFO","Years", "Price")
-#exchangerate = read.csv("eurostat-ert_bil_eur_a_exchangerate.csv")
-#co2 = read.csv("eurostat-env_air_gge_co2.csv") # in thousands of tonnes
+# LOAD THE DATA
+data.ROC.Value = read.csv("ROC.Value.csv")
 
-# Time range
+# Parameters
+Discount.rate = 0.08 # 8%
+Exchange.rate.GBP = 1.5 # GBP/EUR
+Exchange.rate.LTL = 63.7/220 # LTL/EUR. Calculated as 63.7EUR/220LTL. Calculated using the infomation from Marciukatis (2011)
+Pool.price.UK = 3 # p/KWh. This number is missing in Butler and Neuhoff (2008), but by using trial-and-error we found 3, to fits the numbers and graphs presented in Butler and Neuhoff (2008).
+Pool.price.LT = 1.5 # c/KWh. Assumption here ??? same as UK or ?
+
+# Time range for build year
 years = c(2002:2021)
 
 # Creating empty components that we will fill content into later
-ROC.pounds = rep(NA, length(years)) # ROC (p/KWh)
-EEG.euro = rep(NA, length(years)) # EGG (c/KWh)
-EEG.pounds = rep(NA, length(years)) # EGG (p/KWh)
-LT.euro = rep(NA, length(years)) # Lithuania (p/KWh)
+DE.FIT.initial.fee = NA
+DE.FIT.basic.fee = NA
+DE.FIT.degression.rate = NA
+LT.FIT.initial.fee = NA
+# Cash flow:
+# x-axis: build year,     y-axis: years after build.
+# x-axis: year 2002-2021, y-axis: the 20 year investment evaluation period.
+DE.cash.flow = matrix(NA, ncol = length(years), nrow = 20) # c/KWh
+LT.cash.flow = matrix(NA, ncol = length(years), nrow = 20) # c/KWh
+UK.cash.flow = matrix(NA, ncol = length(years), nrow = 20) # p/KWh
+colnames(DE.cash.flow) = years
+colnames(LT.cash.flow) = years
+colnames(UK.cash.flow) = years
 
 
 #####
-# ROC
+# Germany cash flow
 #####
 
+# For each build year the EEG gives an intial fee (for the first 5 years) and a basic fee (for the following 15 years).
+# These rates are degressed from build year to build year, corresponding to the degression rate specified in the EEG.
+for(i in 1:20) { # for each year after build (row)
+  for(j in 1:length(years)) { # for each build year (coloumn)
 
-
-#####
-# EGG (c/KWh)
-#####
-Feedintariff.DE = rep(NA, length(years))
-# 2002-2004: The Renewable Energy Sources Act of 2000
-Feedintariff.DE[1] = 9.0 
-Feedintariff.DE[2] = 8.8
-Feedintariff.DE[3] = 8.7
-for(i in 4:20) {
-  # 2004: 8.70 c/KWh. Decrease with 2% anually
-  Feedintariff.DE[[i]] = Feedintariff.DE[[i-1]] * (1 - 0.02)
+    # EEG 2000 (2000-2004)
+    if(j == 1) {
+      # Rates for year 2000
+      DE.FIT.initial.fee = 9.1 # c/KWh
+      DE.FIT.basic.fee = 6.17 # c/KWh
+      DE.FIT.degression.rate = 0.015 # 1.5%
+      # Degression from 2002.
+      DE.FIT.initial.fee = DE.FIT.initial.fee * (1-DE.FIT.degression.rate)
+      DE.FIT.basic.fee = DE.FIT.basic.fee * (1-DE.FIT.degression.rate)
+      
+    # EEG 2004 (2005-2008)
+    } else if(j == 4) {
+      # Rates for year 2004
+      DE.FIT.initial.fee = 8.7 # c/KWh
+      DE.FIT.basic.fee = 5.5 # c/KWh
+      DE.FIT.degression.rate = 0.02 # 2%
+      # Start from 2005: 
+      DE.FIT.initial.fee = DE.FIT.initial.fee * (1-DE.FIT.degression.rate)
+      DE.FIT.basic.fee = DE.FIT.basic.fee * (1-DE.FIT.degression.rate)
+      
+    # EEG 2009 (2009-20011)
+    } else if(j == 8) { 
+      # Rates for year 2009
+      DE.FIT.initial.fee = 9.2 # c/KWh
+      DE.FIT.basic.fee = 5.02 # c/KWh
+      DE.FIT.degression.rate = 0.01 # 1%
+      
+    # EEG 2012 (2012-)
+    } else if(j == 11) { 
+      # Rates for year 2012
+      DE.FIT.initial.fee = 8.93 # c/KWh
+      DE.FIT.basic.fee = 4.87 # c/KWh
+      DE.FIT.degression.rate = 0.015 # 1.5%
+      
+    # Degress fees according to degression rates
+    } else {
+      DE.FIT.initial.fee = DE.FIT.initial.fee * (1-DE.FIT.degression.rate)
+      DE.FIT.basic.fee = DE.FIT.basic.fee * (1-DE.FIT.degression.rate)
+    }
+    
+    # First 5 years: initial fee. Thereafter: basic fee.
+    if(i <= 5) {
+      DE.cash.flow[i,j] = DE.FIT.initial.fee
+    } else {
+      DE.cash.flow[i,j] = DE.FIT.basic.fee
+    }
+    
+  }
 }
 
+# Round numbers:
+# Degression rates should be calculated on the unrounded numbers, but developers will pay using rounded numbers. 
+for(i in 1:20) { # for each year after build (row)
+  for(j in 1:length(years)) { # for each build year (coloumn)
+    
+    # Round to 1 digit in EEG 2000, and 2 digit in all following EEGs.
+    if(j < 4) {
+      DE.cash.flow[i,j] = round(DE.cash.flow[i,j], digits = 1)
+    } else {
+      DE.cash.flow[i,j] = round(DE.cash.flow[i,j], digits = 2)
+    }
+    
+  }
+}
 
+#####
+# Lithuania cash flow
+#####
+
+# For each build year the LT FIT system gives fee (for the first 12 years) and thereafter developers recive the pool price.
+for(i in 1:20) { # for each year after build (row)
+  for(j in 1:length(years)) { # for each build year (coloumn)
+    
+    # 2002-2008
+    if(j == 1) { LT.FIT.initial.fee = 6.37 # c/KWh
+      
+    # 2009-2012
+    } else if(j == 8) { LT.FIT.initial.fee = 8.69 # c/KWh
+      
+    # 2012-
+    # What assumptions should be make ?? Simple average of the three sub-band rates or ???
+    } else if(j == 11) { # LT.FIT.initial.fee =
+    }
+    
+    # First 5 years: initial fee. Thereafter: basic fee.
+    if(i <= 12) {
+      LT.cash.flow[i,j] = LT.FIT.initial.fee
+    } else {
+      LT.cash.flow[i,j] = Pool.price.LT
+    }
+    
+  }
+}
+
+#####
+# UK cash flow
+#####
+
+# Using the total ROC value, that we calculated in fig_roc-price-compontents.R, we fill in each year with its respective price.
+# For years after 2021 where we have not calculated ROC value:
+# We will assume fixed price of 3 similar to (but not mentioned in) Butler and Neuhoff (2008). The number 3 has been found by method of trial-and-error.
+for(i in 1:20) { # for each year after build (row)
+  for(j in 1:length(years)) { # for each build year (coloumn)
+    if( ((i-1)+j) <= length(data.ROC.Value$Total) ) { # if we have calculated the ROC value for the specific year
+      UK.cash.flow[i,j] = data.ROC.Value$Total[[((i-1)+j)]] # Total ROC value p/KWH
+    } else {
+      UK.cash.flow[i,j] = Pool.price.UK # 3 p/KWh
+    }
+  }
+}
+
+#####
+# Calculating Net Present Value and correspoding Payment
+#####
+
+NPV = function(i, N) {
+  SUM = 0
+  for(t in 1:length(N)) {
+    SUM = SUM + N[[t]]/((1+i)^t)
+  }
+  SUM # returns the SUM
+}
+
+PMT = function(i, n, PV) {
+  PV / ( (1 - (1/(1 + i)^n)) / i ) # Returns payment
+}  
+
+# calculating NPV for each year
+DE.NPV = sapply(colnames(DE.cash.flow), function(x){NPV(Discount.rate, DE.cash.flow[, x])} ) 
+LT.NPV = sapply(colnames(LT.cash.flow), function(x){NPV(Discount.rate, LT.cash.flow[, x])} )
+UK.NPV = sapply(colnames(UK.cash.flow), function(x){NPV(Discount.rate, UK.cash.flow[, x])} )
+
+# calculating Payment for each year
+DE.PMT = lapply(DE.NPV, function(x){PMT(Discount.rate, 20, x)} ) 
+LT.PMT = lapply(LT.NPV, function(x){PMT(Discount.rate, 20, x)} )
+UK.PMT = lapply(UK.NPV, function(x){PMT(Discount.rate, 20, x)} )
 
 
 #####
-# Germany (with prologation, with UK wind resources)
+# Plotting
 #####
 
+# German rates in pounds instead of euro
+DE.PMT.POUNDS = lapply(DE.PMT, function(x){ x/Exchange.rate.GBP } )
 
+pdf(file="fig_expected-average-remuneration.pdf", height=3.5, width=5)
 
-#####
-# Germany (no prologation, with UK wind resources)
-#####
+par(mar=c(4,4,1,4)+.3, yaxs='i') # margin, and y-axis start at y=0
+plot(x=years, y=UK.PMT, axes=FALSE, col="gray", type="h", lwd=10, lend="square", xlab="Years", ylab="p/KWh", ylim=range(0,10))
+axis(1, labels=FALSE)
+axis(1, at=years, cex.axis=0.7)
+axis(2)
+points(x=years, y=DE.PMT.POUNDS, pch=4)
+par(new=TRUE) # plot the following using the secondary axis: 
+plot(x=years, y=DE.PMT, type="l", xaxt="n", yaxt="n", xlab="", ylab="", ylim=range(0,10*Exchange.rate.GBP))
+lines(x=years, y=LT.PMT, col="purple")
+axis(4) # add secondary axis
+mtext("c/KWh",side=4,line=3)
+legend("topright", legend=c("UK (p/KWh)","DE (p/KWh)", "DE (c/KWh)", "LT (c/KWH)"), col=c("grey","black", "black","purple"), lty = c(NA, NA,"solid","solid"), pch = c(15, 4, NA, NA), lwd=c(20, 1, 1, 1), cex=0.5)
 
-# Germnay, but scaled according to fig_generation-capacity.pdf
-
-
-
-# Join in table
-#ROC.Value = cbind(years, Buy.Out.Value, Recycled.Green.Premium, Levy.Exemption.Certificate, Energy.Value, CO2.Price, deparse.level = 1)
-#ROC.Value = cbind(Buy.Out.Value, Recycled.Green.Premium, Levy.Exemption.Certificate, Energy.Value, CO2.Price, deparse.level = 1)
-
-# Transform to long format
-#m.ROC.Value = melt(as.data.frame(ROC.Value), measure.vars = 2:6)
-#m.ROC.Value = melt(ROC.Value)
-#m.ROC.Value = cbind(m.ROC.Value, m.ROC.Value$Var1 + rep(2001, 100)) # work around to add years propperly
-#colnames(m.ROC.Value) = c("id", "variable", "value", "years")
-
-# Plot stacked barplot
-#ggplot(m.ROC.Value, aes(x=factor(years), y=value, fill=factor(variable)) ) + 
-#  geom_bar(position="stack") + 
-#  ylab("p/KWh") + 
-#  xlab("Years") +
-#  labs(fill="", title="Components of the Price Paid to Wind Energy under ROC (2002 - 2021)") +
-#  coord_cartesian(ylim = c(0, 8)) +
-#  theme_bw() +
-#  theme(legend.position="top")
-#  #theme(axis.text.x = element_text(size = 8))
-#ggsave("figure_roc-price-components.pdf")
+dev.off()
