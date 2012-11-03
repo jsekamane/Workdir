@@ -5,6 +5,7 @@
 #	Notes: 
 # Units: p/KWh and c/KWh
 # Dependencies: fig_roc-price-compontents.R (ROC.Value.csv)
+# Reverse dependencies: fig_anticipated-price-energy.R (DE.PMT.csv, LT.PMT.csv, UK.PMT.csv).
 #
 ####################
 
@@ -23,6 +24,7 @@ Pool.price.LT = 1.5 # c/KWh. Assumption here ??? same as UK or ?
 
 # Time range for build year
 years = c(2002:2021)
+years.DE = c(2000:2021)
 
 # Creating empty components that we will fill content into later
 DE.FIT.initial.fee = NA
@@ -31,11 +33,11 @@ DE.FIT.degression.rate = NA
 LT.FIT.initial.fee = NA
 # Cash flow:
 # x-axis: build year,     y-axis: years after build.
-# x-axis: year 2002-2021, y-axis: the 20 year investment evaluation period.
-DE.cash.flow = matrix(NA, ncol = length(years), nrow = 20) # c/KWh
+# x-axis: year 2002-2021, y-axis: the 20 year investment evaluation perio d.
+DE.cash.flow = matrix(NA, ncol = length(years.DE), nrow = 20) # c/KWh. Start from 2000 - and afterwards we export and then remove extra years.
 LT.cash.flow = matrix(NA, ncol = length(years), nrow = 20) # c/KWh
 UK.cash.flow = matrix(NA, ncol = length(years), nrow = 20) # p/KWh
-colnames(DE.cash.flow) = years
+colnames(DE.cash.flow) = years.DE
 colnames(LT.cash.flow) = years
 colnames(UK.cash.flow) = years
 
@@ -47,20 +49,22 @@ colnames(UK.cash.flow) = years
 # For each build year the EEG gives an intial fee (for the first 5 years) and a basic fee (for the following 15 years).
 # These rates are degressed from build year to build year, corresponding to the degression rate specified in the EEG.
 for(i in 1:20) { # for each year after build (row)
-  for(j in 1:length(years)) { # for each build year (coloumn)
+  # Start from 2000 - and afterwards we export and then remove extra years.
+  for(j in 1:length(years.DE)) { # for each build year (coloumn)
 
     # EEG 2000 (2000-2004)
-    if(j == 1) {
+    if(j <= 3) {
       # Rates for year 2000
       DE.FIT.initial.fee = 9.1 # c/KWh
       DE.FIT.basic.fee = 6.17 # c/KWh
       DE.FIT.degression.rate = 0.015 # 1.5%
       # Degression from 2002.
-      DE.FIT.initial.fee = DE.FIT.initial.fee * (1-DE.FIT.degression.rate)
-      DE.FIT.basic.fee = DE.FIT.basic.fee * (1-DE.FIT.degression.rate)
-      
+      if(j == 3) {
+        DE.FIT.initial.fee = DE.FIT.initial.fee * (1-DE.FIT.degression.rate)
+        DE.FIT.basic.fee = DE.FIT.basic.fee * (1-DE.FIT.degression.rate)
+      }
     # EEG 2004 (2005-2008)
-    } else if(j == 4) {
+    } else if(j == 6) {
       # Rates for year 2004
       DE.FIT.initial.fee = 8.7 # c/KWh
       DE.FIT.basic.fee = 5.5 # c/KWh
@@ -70,14 +74,14 @@ for(i in 1:20) { # for each year after build (row)
       DE.FIT.basic.fee = DE.FIT.basic.fee * (1-DE.FIT.degression.rate)
       
     # EEG 2009 (2009-20011)
-    } else if(j == 8) { 
+    } else if(j == 10) { 
       # Rates for year 2009
       DE.FIT.initial.fee = 9.2 # c/KWh
       DE.FIT.basic.fee = 5.02 # c/KWh
       DE.FIT.degression.rate = 0.01 # 1%
       
     # EEG 2012 (2012-)
-    } else if(j == 11) { 
+    } else if(j == 13) { 
       # Rates for year 2012
       DE.FIT.initial.fee = 8.93 # c/KWh
       DE.FIT.basic.fee = 4.87 # c/KWh
@@ -102,10 +106,10 @@ for(i in 1:20) { # for each year after build (row)
 # Round numbers:
 # Degression rates should be calculated on the unrounded numbers, but developers will pay using rounded numbers. 
 for(i in 1:20) { # for each year after build (row)
-  for(j in 1:length(years)) { # for each build year (coloumn)
+  for(j in 1:length(years.DE)) { # for each build year (coloumn)
     
     # Round to 1 digit in EEG 2000, and 2 digit in all following EEGs.
-    if(j < 4) {
+    if(j > 2 && j < 6 ) {
       DE.cash.flow[i,j] = round(DE.cash.flow[i,j], digits = 1)
     } else {
       DE.cash.flow[i,j] = round(DE.cash.flow[i,j], digits = 2)
@@ -186,13 +190,15 @@ DE.PMT = lapply(DE.NPV, function(x){PMT(Discount.rate, 20, x)} )
 LT.PMT = lapply(LT.NPV, function(x){PMT(Discount.rate, 20, x)} )
 UK.PMT = lapply(UK.NPV, function(x){PMT(Discount.rate, 20, x)} )
 
+# save for export and remove years 2000 and 2001
+DE.PMT.short = DE.PMT[3:22]
 
 #####
 # Plotting
 #####
 
 # German rates in pounds instead of euro
-DE.PMT.POUNDS = lapply(DE.PMT, function(x){ x/Exchange.rate.GBP } )
+DE.PMT.POUNDS = lapply(DE.PMT.short, function(x){ x/Exchange.rate.GBP } )
 
 pdf(file="fig_expected-average-remuneration.pdf", height=3.5, width=5)
 
@@ -203,10 +209,19 @@ axis(1, at=years, cex.axis=0.7)
 axis(2)
 points(x=years, y=DE.PMT.POUNDS, pch=4)
 par(new=TRUE) # plot the following using the secondary axis: 
-plot(x=years, y=DE.PMT, type="l", xaxt="n", yaxt="n", xlab="", ylab="", ylim=range(0,10*Exchange.rate.GBP))
+plot(x=years, y=DE.PMT.short, type="l", xaxt="n", yaxt="n", xlab="", ylab="", ylim=range(0,10*Exchange.rate.GBP))
 lines(x=years, y=LT.PMT, col="purple")
 axis(4) # add secondary axis
 mtext("c/KWh",side=4,line=3)
 legend("topright", legend=c("UK (p/KWh)","DE (p/KWh)", "DE (c/KWh)", "LT (c/KWH)"), col=c("grey","black", "black","purple"), lty = c(NA, NA,"solid","solid"), pch = c(15, 4, NA, NA), lwd=c(20, 1, 1, 1), cex=0.5)
 
 dev.off()
+
+#####
+# Export
+#####
+
+# Save to CSV
+write.csv(cbind(DE.PMT), "DE.PMT.csv", row.names=TRUE)
+write.csv(cbind(LT.PMT), "LT.PMT.csv", row.names=TRUE)
+write.csv(cbind(UK.PMT), "UK.PMT.csv", row.names=TRUE)
