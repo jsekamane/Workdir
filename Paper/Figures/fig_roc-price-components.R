@@ -5,6 +5,7 @@
 #	Data sources: EUROSTAT (sts_inppgr_a, ert_bil_eur_a). Ofgem (2004, p. 23-24. 2008, Table 1-3. 2012, Table 1-3). IFS (2012). NFPA (2012). e-ROC (2012). Defra / DECC (2012, table 4). BlueNext (2012).
 #	Notes: Recycled Green Premium (redistributed buy-out funds) are reported six months displaced: 2002/2003, 2003/2004, etc. and we have therefore been averaged. Levy Exemption Certificate (Climate Change Levy) is similarly reported, we have used first year, e.g. 2002 in 2002/2003 rate.
 #	Units: p/KWh = £0.01/KWh = £ 1/100 /KWh
+# Reverse dependencies: fig_expected-average-remuneration.R (ROC.Value.csv)
 #
 ####################
 
@@ -160,3 +161,13 @@ ggplot(m.ROC.Value, aes(x=factor(years), y=value, fill=factor(variable)) ) +
   theme(legend.position="top")
   #theme(axis.text.x = element_text(size = 8))
 ggsave("figure_roc-price-components.pdf")
+
+
+#####
+# Export data
+#####
+
+# ROC value sum
+Total = rowSums(ROC.Value[,2:6])
+# Save to CSV
+write.csv(cbind(years, Total), "ROC.Value.csv", row.names=TRUE)
