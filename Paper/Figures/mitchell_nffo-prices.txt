@@ -1,0 +1,4 @@
+Title: NFFO prices and number of contracts
+Note: Number of contracts for NFFO-5 are taken from Ofgem (1998). The number of subband contracts only includes wind farm sizes up to 1MW, and not 1.6 like NFFO3-4 and the prices.
+Source: Mitchell (2000, table 3 and 8-9), Ofgem (1998, table 5)
+Units: p/KWh
