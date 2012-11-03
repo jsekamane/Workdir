@@ -8,7 +8,7 @@
 
 
 # DATA
-# an average wind speed of 7.04 m/s at 25m. UK wind speed calculated using the DTI NOABL database.
+# speed at existing wind farms ... an average wind speed of 7.04 m/s at 25m. UK wind speed calculated using the DTI NOABL database.
 UK.25m = 7.04 # m/s
 # “reference turbine” is ... operating at an average wind speed of 5.5 m/s at 30 m height with ... a roughness length of 0.1 m
 DE.30m = 5.5 # m/s
