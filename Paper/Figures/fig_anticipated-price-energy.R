@@ -34,6 +34,7 @@ Exchange.rate.GBP = 1.5 # GBP/EUR
 Exchange.rate.pfennig =  0.51 # EUR-cent per Pfennig
 DE.FIT.initial.fee = 9.1 # c/KWh. From EEG 2000.
 DE.FIT.basic.fee = 6.17 # c/KWh. From EEG 2000.
+Pool.price.UK = 1.5 # p/KWh. Why not same pool price for NFFO and ROC ???
 
 # Time range
 years = c(1990:2010)
@@ -103,73 +104,125 @@ for(i in 1:20) { # for each year after build (row)
 data.nffo.prices2$Projects[1:2] = 1
 # Replace NA values with 0:
 data.nffo.prices2[is.na(data.nffo.prices2)] = 0
+# Calculate average price: (Price * Project + Price.Subband * Project.Subband) / (Project + Project.Subband)
 NFFO.weighted.prices = cbind(data.nffo.prices2[1:2], apply(data.nffo.prices2, 1, function(x){ (x[3]*x[5]+x[4]*x[6])/(x[5]+x[6]) }))
 colnames(NFFO.weighted.prices) = c("NFFO", "Year", "Price")
       
 for(i in 1:20) { # for each year after build (row)
   for(j in 1:nrow(data.nffo.prices2)) { # for each build year (coloumn). 
-
-    # NFFO.weighted.prices
-    #NFFO.cash.flow[i,j] =
+    
+    if(j == 1 && i <= 8) { # If NFFO1 and before 1998 then NFFO1 price
+      NFFO.cash.flow[i,j] = NFFO.weighted.prices$Price[[j]]
+    } else if(j == 2 && i <= 7) { # If NFFO2 and before 1998 then NFFO2 price
+      NFFO.cash.flow[i,j] = NFFO.weighted.prices$Price[[j]]
+    } else if(j > 2 && i <= 15) { # If NFFO3-5 then NFFO3-5 prices for first 15 years.
+      NFFO.cash.flow[i,j] = NFFO.weighted.prices$Price[[j]]
+    } else { # otherwise pay pool price
+      NFFO.cash.flow[i,j] = Pool.price.UK 
+    }
+    
   }
 }
 
 
-# NFFO 1-5 (1990-2001)
-# Net Present Value Calculation ???
-#for(i in 1:5) {
-#  j = (nffo.prices$Year[[i]]-1990) # Converts years coloumn to index that corresponds with out array
-  # Adjust the prices to 2003 prices (???)
-  # The length of contracts during which turbines received a subsidised electricity price under the NFFO increased during the 1990s. Take this into consideration!
-  # Revenues in subsequent years were set at the pool price of 1.5 p/kWh.
-#  UK[j] = nffo.prices$Price[[i]] # p/KWh
-#}
-# ROC (2002-2006)
-#for(i in 12:17) {
-  #UK[j] = # p/KWh
-#}
+#####
+# Calculating Net Present Value and correspoding Payment
+#####
+
+NPV = function(i, N) {
+  SUM = 0
+  for(t in 1:length(N)) {
+    SUM = SUM + N[[t]]/((1+i)^t)
+  }
+  SUM # returns the SUM
+}
+
+PMT = function(i, n, PV) {
+  PV / ( (1 - (1/(1 + i)^n)) / i ) # Returns payment
+}  
+
+# calculating NPV for each year
+StrEG.NPV = sapply(colnames(StrEG.cash.flow), function(x){NPV(Discount.rate, StrEG.cash.flow[, x])} ) 
+NFFO.NPV = sapply(colnames(NFFO.cash.flow), function(x){NPV(Discount.rate, NFFO.cash.flow[, x])} )
+
+# calculating Payment for each year
+StrEG.PMT = lapply(StrEG.NPV, function(x){PMT(Discount.rate, 20, x)} ) 
+NFFO.PMT = lapply(NFFO.NPV, function(x){PMT(Discount.rate, 20, x)} )
 
 
 #####
-# Germany
+# Merging NFFO wtih ROC and StrEG with EEG
 #####
 
-# Need data source ???
-# Germany = 
+NFFO.PMT.temp = cbind(data.nffo.prices2$Year, NFFO.PMT)
+colnames(data.UK.PMT) = c("Years","UK.PMT")
+colnames(NFFO.PMT.temp) = c("Years","UK.PMT") # needs identical colomnames inorder to merge
+rownames(NFFO.PMT.temp) = NULL # resets row names
+UK.PMT = rbind(NFFO.PMT.temp ,data.UK.PMT)
+
+StrEG.PMT.temp = cbind(years[1:10], StrEG.PMT) 
+colnames(data.DE.PMT) = c("Years","DE.PMT")
+colnames(StrEG.PMT.temp) = c("Years","DE.PMT") # needs identical colomnames inorder to merge
+rownames(StrEG.PMT.temp) = NULL # resets row names
+DE.PMT = rbind(StrEG.PMT.temp, data.DE.PMT)
 
 
 #####
-# Germany (with prologation, with UK wind resources)
+# Deflating prices (using price index)
 #####
 
+# We deflate the PMT-prices according to the RPI/PPI - instead of defalting the price that are paid each year (e.g. the prices enter into the cash flow) ???
+
+# Merging UK PMT and the UK price index into one table (where the year is similar in both list). And then apply calculations across rows that deflate the price.
+UK.PMT.merge = merge(UK.2003.rpi, UK.PMT, by.x="Years", by.y="Years", sort=FALSE)
+UK.PMT.priceadjusted = cbind(UK.PMT.merge$Years, apply( UK.PMT.merge, 1, function(x){ as.numeric(x[3])/as.numeric(x[2])*100 } )) # p/KWh, RPI price adjusted (2003=100).
+colnames(UK.PMT.priceadjusted) = c("Years", "Price")
+
+# Merging DE PMT and the DE price index into one table (where the year is similar in both list). And then apply calculations across rows that deflate the price.
+DE.PMT.merge = merge(DE.2003.rpi, DE.PMT, by.x="Years", by.y="Years", sort=FALSE)
+DE.PMT.priceadjusted = cbind(DE.PMT.merge$Years, apply( DE.PMT.merge, 1, function(x){ as.numeric(x[3])/as.numeric(x[2])*100 } )) # c/KWh, RPI price adjusted (2003=100).
+colnames(DE.PMT.priceadjusted) = c("Years", "Price")
+
+# Merging LT PMT and the LT price index into one table (where the year is similar in both list). And then apply calculations across rows that deflate the price.
+LT.PMT.merge = merge(LT.2003.ppi, data.LT.PMT, by.x="Years", by.y="X", sort=FALSE)
+LT.PMT.priceadjusted = cbind(LT.PMT.merge[1], apply( LT.PMT.merge, 1, function(x){ as.numeric(x[3])/as.numeric(x[2])*100 } )) # c/KWh, RPI price adjusted (2003=100).
+colnames(LT.PMT.priceadjusted) = c("Years", "Price")
 
 
 #####
-# Germany (no prologation, with UK wind resources)
+# Scale to UK wind resources
 #####
 
-# Germnay, but scaled according to fig_generation-capacity.pdf
+# From Butler and Neuhoff (2008): "If, for example, [wind-]output is 20% higher, then the price paid per MWh can be reduced by 20% while maintaining the same revenue stream for the project and creating little additional maintenance costs."
+DE.wind.scalefactor = cbind(data.production$X, (data.production$Germany/data.capacity$Germany*1000) / (data.production$United.Kingdom/data.capacity$United.Kingdom*1000) )
+colnames(DE.wind.scalefactor) = c("Years", "Share")
+LT.wind.scalefactor = cbind(data.production$X, (data.production$Lithuania/data.capacity$Lithuania*1000) / (data.production$United.Kingdom/data.capacity$United.Kingdom*1000) )
+colnames(LT.wind.scalefactor) = c("Years", "Share")
+
+# Manual restricting time period to 1991-2010 for both lists.
+DE.PMT.priceadjusted.windadjusted = cbind(DE.PMT.priceadjusted[1:20,1], as.numeric(DE.PMT.priceadjusted[1:20,2])*as.numeric(DE.wind.scalefactor[2:21,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
+# Manual restricting time period to 2004-2010 for both lists.
+LT.PMT.priceadjusted.windadjusted = cbind(LT.PMT.priceadjusted[3:9,1], as.numeric(LT.PMT.priceadjusted[3:9,2])*as.numeric(LT.wind.scalefactor[15:21,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
 
 
+#####
+# Plotting
+#####
 
-# Join in table
-#ROC.Value = cbind(years, Buy.Out.Value, Recycled.Green.Premium, Levy.Exemption.Certificate, Energy.Value, CO2.Price, deparse.level = 1)
-#ROC.Value = cbind(Buy.Out.Value, Recycled.Green.Premium, Levy.Exemption.Certificate, Energy.Value, CO2.Price, deparse.level = 1)
+pdf(file="fig_anticipated-price-energy.pdf", height=3.5, width=5)
 
-# Transform to long format
-#m.ROC.Value = melt(as.data.frame(ROC.Value), measure.vars = 2:6)
-#m.ROC.Value = melt(ROC.Value)
-#m.ROC.Value = cbind(m.ROC.Value, m.ROC.Value$Var1 + rep(2001, 100)) # work around to add years propperly
-#colnames(m.ROC.Value) = c("id", "variable", "value", "years")
+par(mar=c(4,4,1,4)+.3, yaxs='i') # margin, and y-axis start at y=0
+plot(x=UK.PMT.priceadjusted[1:14,1], y=UK.PMT.priceadjusted[1:14,2], axes=FALSE, col="gray", type="h", lwd=10, lend="square", xlab="Years", ylab="p/KWh", ylim=range(0,10))
+axis(1, labels=FALSE)
+axis(1, at=years, cex.axis=0.7)
+axis(2)
+par(new=TRUE) # plot the following using the secondary axis: 
+plot(x=c(1990, DE.PMT.priceadjusted[1:20,1]), y=c(NA, DE.PMT.priceadjusted[1:20,2]), type="l", xaxt="n", yaxt="n", xlab="", ylab="", ylim=range(0,10*Exchange.rate.GBP))
+lines(x=DE.PMT.priceadjusted.windadjusted[,1], y=DE.PMT.priceadjusted.windadjusted[,2], lty="dashed", lwd=1)
+lines(x=LT.PMT.priceadjusted[1:9,1], y=LT.PMT.priceadjusted[1:9,2], col="purple")
+lines(x=LT.PMT.priceadjusted.windadjusted[,1], y=LT.PMT.priceadjusted.windadjusted[,2], col="purple", lty="dashed", lwd=1)
+axis(4) # add secondary axis
+mtext("c/KWh",side=4,line=3)
+legend("topright", legend=c("UK (p/KWh)","DE (p/KWh)", "DE (c/KWh) (with UK wind)", "LT (c/KWh)", "LT (c/KWh) (with UK wind)"), col=c("grey","black","black","purple","purple"), lty = c(NA,"solid","dashed","solid","dashed"), pch = c(15, NA, NA, NA, NA), lwd=c(20, 1, 1, 1, 1), cex=0.5)
 
-# Plot stacked barplot
-#ggplot(m.ROC.Value, aes(x=factor(years), y=value, fill=factor(variable)) ) + 
-#  geom_bar(position="stack") + 
-#  ylab("p/KWh") + 
-#  xlab("Years") +
-#  labs(fill="", title="Components of the Price Paid to Wind Energy under ROC (2002 - 2021)") +
-#  coord_cartesian(ylim = c(0, 8)) +
-#  theme_bw() +
-#  theme(legend.position="top")
-#  #theme(axis.text.x = element_text(size = 8))
-#ggsave("figure_roc-price-components.pdf")
+dev.off()
