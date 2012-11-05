@@ -213,7 +213,7 @@ plot(x=years, y=DE.PMT.short, type="l", xaxt="n", yaxt="n", xlab="", ylab="", yl
 lines(x=years, y=LT.PMT, col="purple")
 axis(4) # add secondary axis
 mtext("c/KWh",side=4,line=3)
-legend("topright", legend=c("UK (p/KWh)","DE (p/KWh)", "DE (c/KWh)", "LT (c/KWH)"), col=c("grey","black", "black","purple"), lty = c(NA, NA,"solid","solid"), pch = c(15, 4, NA, NA), lwd=c(20, 1, 1, 1), cex=0.5)
+legend("topright", legend=c("UK (p/KWh)","DE (p/KWh)", "DE (c/KWh)", "LT (c/KWh)"), col=c("grey","black", "black","purple"), lty = c(NA, NA,"solid","solid"), pch = c(15, 4, NA, NA), lwd=c(20, 1, 1, 1), cex=0.5)
 
 dev.off()
 
