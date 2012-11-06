@@ -135,6 +135,8 @@ for(i in 1:20) { # for each year after build (row)
     # 2012-
     # What assumptions should be make ?? Simple average of the three sub-band rates or ???
     } else if(j == 11) { # LT.FIT.initial.fee =
+      # simple average of data from http://www.regula.lt in LTL, so also applying exchange rate to get it in euro-cent
+      LT.FIT.initial.fee = mean(c(370, 360, 280))*Exchange.rate.LTL/10
     }
     
     # First 5 years: initial fee. Thereafter: basic fee.
