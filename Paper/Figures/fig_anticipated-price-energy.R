@@ -4,7 +4,7 @@
 #	Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). 
 #	Notes: 
 # Units: p/KWh and c/KWh
-# Dependencies: fig_anticipated-price-energy.R (DE.PMT.csv, LT.PMT.csv, UK.PMT.csv).
+# Dependencies: fig_expected-average-remuneration.R (DE.PMT.csv, LT.PMT.csv, UK.PMT.csv).
 #
 ####################
 
