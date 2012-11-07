@@ -27,6 +27,7 @@ data.exchangerate = read.csv("eurostat-ert_bil_eur_a_exchangerate.csv")
 #data.co2.emission = read.csv("eurostat-env_air_gge_co2.csv") # in thousands of tonnes
 data.co2.conversion.factor = read.csv("DECC_CO2-conversion-factor.csv") # in kgCO2e / kWh
 data.co2.avg.spot.price = read.csv("bluenext_co2price-avg-year.csv") # in €/tCO2
+# data.co2.avg.spot.price2 = read.csv("ice_co2price-avg-year.csv") # in ??? assuming €/tCO2. Alternative CO2 Spot prices, but no data for 2005.
 
 # Sorting data
 data.co2.avg.spot.price = data.co2.avg.spot.price[ order(data.co2.avg.spot.price[,2]), ]
@@ -68,11 +69,10 @@ Recycled.Green.Premium[1] = data.buyout.fund$Redestributed[1]
 for(i in 2:9) {
   Recycled.Green.Premium[[i]] = mean(c(data.buyout.fund$Redestributed[[i-1]],data.buyout.fund$Redestributed[[i]]))
 }
-# we assume a high rate of renewable build such that the renewables target is met by ... 2015 ... and the recycled premium falls to zero.
-# Maybe make different assumption - on the other hand this will be a lower bound estimation of price.
-Recycled.Green.Premium[14:20] = 0
-for(i in 10:13) {
-  Recycled.Green.Premium[[i]] = Recycled.Green.Premium[[i-1]] - (Recycled.Green.Premium[9]-Recycled.Green.Premium[14])/5
+# we assume ... that the renewables target is met by ... 2020 ... and the recycled premium falls to zero.
+Recycled.Green.Premium[19:20] = 0
+for(i in 10:18) {
+  Recycled.Green.Premium[[i]] = Recycled.Green.Premium[[i-1]] - (Recycled.Green.Premium[9]-Recycled.Green.Premium[19])/10
 }
 
 
@@ -89,8 +89,8 @@ Levy.Exemption.Certificate[1] = data.climate.change.levy$Electricity[2]
 for(i in 2:9) {
   Levy.Exemption.Certificate[[i]] = data.climate.change.levy$Electricity[[i+1]]
 }
-# Assumption from 2010 and onwards: Fairly stable so far, therefore we wil assume that it will continue to be at the 2010-11 level.
-Levy.Exemption.Certificate[10:20] = data.climate.change.levy$Electricity[10]
+# Assumption from 2010 and onwards: Fairly stable so far, therefore we wil assume that it will be 50% of the 2010-11 level.
+Levy.Exemption.Certificate[10:20] = data.climate.change.levy$Electricity[10]*0.50
 
 
 #####
