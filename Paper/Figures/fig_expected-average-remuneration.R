@@ -139,7 +139,7 @@ for(i in 1:20) { # for each year after build (row)
       LT.FIT.initial.fee = mean(c(370, 360, 280))*Exchange.rate.LTL/10
     }
     
-    # First 5 years: initial fee. Thereafter: basic fee.
+    # First 12 years: initial fee. Thereafter: pool price.
     if(i <= 12) {
       LT.cash.flow[i,j] = LT.FIT.initial.fee
     } else {
