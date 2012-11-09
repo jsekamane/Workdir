@@ -3,7 +3,7 @@
 #	Title:  Expected Average Remuneration under the EEG and the ROC. (2002 - 2021)
 # Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). 
 # Data sources: EUROSTAT (sts_inpp_a). DE: BMU (EEG 2000, section 7. EEG 2004, article 10. EEG 2009, section 20, 29 and 30. EEG 2012, section 20, 29 and 30). Lauber and Mez (2004). Statistisches Bundesamt (WZ08-47).  LT: Marciukatis (2011). Baltpool (2012). UK: [See previous calculations]. Office for National Statistics (MM23)
-#	Notes: 
+#	Notes: Assumed fixed annual inflation rate from 2012 in all three countries of 1.96%.
 # Units: p/KWh and c/KWh (in 2003-prices)
 # Dependencies: fig_roc-price-compontents.R (ROC.Value.csv)
 # Reverse dependencies: fig_anticipated-price-energy.R (DE.PMT.csv, LT.PMT.csv, UK.PMT.csv).
