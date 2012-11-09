@@ -1,7 +1,8 @@
 ####################
 #
 #	Title:  Expected Average Remuneration under the EEG and the ROC. (2002 - 2021)
-# Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). DE: BMU (EEG 2000, section 7. EEG 2004, article 10. EEG 2009, section 20, 29 and 30. EEG 2012, section 20, 29 and 30). Lauber and Mez (2004). LT: Marciukatis (2011), Baltpool (2012). UK: [See previous calculations]
+# Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). 
+# Data sources: EUROSTAT (sts_inpp_a). DE: BMU (EEG 2000, section 7. EEG 2004, article 10. EEG 2009, section 20, 29 and 30. EEG 2012, section 20, 29 and 30). Lauber and Mez (2004). Statistisches Bundesamt (WZ08-47).  LT: Marciukatis (2011). Baltpool (2012). UK: [See previous calculations]. Office for National Statistics (MM23)
 #	Notes: 
 # Units: p/KWh and c/KWh
 # Dependencies: fig_roc-price-compontents.R (ROC.Value.csv)
@@ -15,11 +16,15 @@
 # LOAD THE DATA
 data.ROC.Value = read.csv("ROC.Value.csv")
 
+data.rpi.UK = read.csv("ons_mm23_rpi.csv") # index (January 1987=100)
+data.rpi.DE = read.csv("destatis_WZ08-47_rpi.csv") # index (2005=100)
+data.ppi = read.csv("eurostat-sts_inpp_a_producerpriceindex.csv") # index (2005=100)
+
 # Parameters
 Discount.rate = 0.08 # 8%
 Exchange.rate.GBP = 1.5 # GBP/EUR
 Exchange.rate.LTL = 63.7/220 # LTL/EUR. Calculated as 63.7EUR/220LTL. Calculated using the infomation from Marciukatis (2011)
-Pool.price.UK = 3 # p/KWh. This number is missing in Butler and Neuhoff (2008), but by using trial-and-error we found 3, to fits the numbers and graphs presented in Butler and Neuhoff (2008).
+Pool.price.UK = 2.79 # p/KWh. From Butler and Neuhoff calculations. They use it from 2025.
 # Before the Ignalina NPP was shut down, there was not electricity market in LT, since Ignalina contributed to the majority of electricity production. And as a consequence the "price" paid to nuclear has been very stable for 10 year, LTL 6.58 (2008), 6.11 (2009) ≈ 1.7. (NCC, 2009 and XXXX 20xx)
 # We make the assumption that:
 # - A fixed pool price for all years, correspond the the average of the last three years market data.
@@ -27,6 +32,7 @@ Pool.price.UK = 3 # p/KWh. This number is missing in Butler and Neuhoff (2008), 
 # - Project developers belevied the the goverments commitment to close down the nuclear power plant no later than 31. december 2009 (European Commission 2008). And that they therefore anticipate the higher market pool price.
 # - Similarly we assume that the market price also take the long term MC ??? into account, and any (evt.) newly constructed nuclear power will not increase the pool price / make it jump.
 Pool.price.LT = 157.36 *Exchange.rate.LTL/10 # c/KWh.
+Future.inflation.rate = 0.0196 # 1.96% annually. From Butler and Neuhoff calculations. Assumption: ECB target of just below 2%. And identical in all three countries.
 
 # Time range for build year
 years = c(2002:2021)
@@ -46,6 +52,64 @@ UK.cash.flow = matrix(NA, ncol = length(years), nrow = 20) # p/KWh
 colnames(DE.cash.flow) = years.DE
 colnames(LT.cash.flow) = years
 colnames(UK.cash.flow) = years
+
+
+#####
+# Fixing base years of the indecies
+#####
+
+# We deflate each value in the cash flow, to the price index in the corresponding year. For years after 2011 we assume the same fixed inflation rate for all countries (1.96%)
+
+# This function changes the base of of an index. Required: the new base year, list of years and corresponding list of index values (as old base year).
+SET.BASE.YEAR = function(base.year, list.years, list.index){
+  i = match(base.year, list.years) # finds the row number that corresponds to the base.year
+  df = cbind(list.years, lapply(list.index, function(x){x/list.index[i]*100}) ) # recaulculating index values
+  #colnames(df) = c("Years", paste("Index (",base.year,"=100)", sep = "") )
+  colnames(df) = c("Years", "Index")
+  df # return data frame with years and index.
+}
+
+UK.2003.rpi = SET.BASE.YEAR(2003, data.rpi.UK$X, data.rpi.UK$CHAW)
+DE.2003.rpi = SET.BASE.YEAR(2003, data.rpi.DE$X, data.rpi.DE[,2])
+LT.2003.ppi = SET.BASE.YEAR(2003, data.ppi$X, data.ppi$Lithuania)
+
+# Extending the price indecies from 2012-2040, using the fixed inflation rates.
+
+UK.2003.rpi.extended = matrix(NA, ncol = 2, nrow = (nrow(UK.2003.rpi)+(2040-2011)) )
+colnames(UK.2003.rpi.extended) = c("Years", "Index")
+for(i in 1:nrow(UK.2003.rpi.extended)) {
+  if(i <= nrow(UK.2003.rpi)) {
+    UK.2003.rpi.extended[,1][[i]] = UK.2003.rpi[,1][[i]]
+    UK.2003.rpi.extended[,2][[i]] = UK.2003.rpi[,2][[i]]
+  } else {
+    UK.2003.rpi.extended[,1][[i]] = UK.2003.rpi.extended[,1][[i-1]] + 1
+    UK.2003.rpi.extended[,2][[i]] = UK.2003.rpi.extended[,2][[i-1]] * (1+Future.inflation.rate)
+  }
+}
+
+DE.2003.rpi.extended = matrix(NA, ncol = 2, nrow = (nrow(DE.2003.rpi)+(2040-2011)) )
+colnames(DE.2003.rpi.extended) = c("Years", "Index")
+for(i in 1:nrow(DE.2003.rpi.extended)) {
+  if(i <= nrow(DE.2003.rpi)) {
+    DE.2003.rpi.extended[,1][[i]] = DE.2003.rpi[,1][[i]]
+    DE.2003.rpi.extended[,2][[i]] = DE.2003.rpi[,2][[i]]
+  } else {
+    DE.2003.rpi.extended[,1][[i]] = DE.2003.rpi.extended[,1][[i-1]] + 1
+    DE.2003.rpi.extended[,2][[i]] = DE.2003.rpi.extended[,2][[i-1]] * (1+Future.inflation.rate)
+  }
+}
+
+LT.2003.ppi.extended = matrix(NA, ncol = 2, nrow = (nrow(LT.2003.ppi)+(2040-2011)) )
+colnames(LT.2003.ppi.extended) = c("Years", "Index")
+for(i in 1:nrow(LT.2003.ppi.extended)) {
+  if(i <= nrow(LT.2003.ppi)) {
+    LT.2003.ppi.extended[,1][[i]] = LT.2003.ppi[,1][[i]]
+    LT.2003.ppi.extended[,2][[i]] = LT.2003.ppi[,2][[i]]
+  } else {
+    LT.2003.ppi.extended[,1][[i]] = LT.2003.ppi.extended[,1][[i-1]] + 1
+    LT.2003.ppi.extended[,2][[i]] = LT.2003.ppi.extended[,2][[i-1]] * (1+Future.inflation.rate)
+  }
+}
 
 
 #####
@@ -105,7 +169,6 @@ for(i in 1:20) { # for each year after build (row)
     } else {
       DE.cash.flow[i,j] = DE.FIT.basic.fee
     }
-    
   }
 }
 
@@ -121,6 +184,13 @@ for(i in 1:20) { # for each year after build (row)
       DE.cash.flow[i,j] = round(DE.cash.flow[i,j], digits = 2)
     }
     
+  }
+}
+
+# Price adjust:
+for(i in 1:20) { # for each year after build (row)
+  for(j in 1:length(years.DE)) { # for each build year (coloumn)
+    DE.cash.flow[i,j] = DE.cash.flow[i,j] / DE.2003.rpi.extended[,2][((i-1)+j+9)] * 100
   }
 }
 
@@ -155,6 +225,13 @@ for(i in 1:20) { # for each year after build (row)
   }
 }
 
+# Price adjust:
+for(i in 1:20) { # for each year after build (row)
+  for(j in 1:length(years)) { # for each build year (coloumn)
+    LT.cash.flow[i,j]  = LT.cash.flow[i,j] / LT.2003.ppi.extended[,2][((i-1)+j+7)] * 100
+  }
+}
+
 #####
 # UK cash flow
 #####
@@ -171,6 +248,18 @@ for(i in 1:20) { # for each year after build (row)
     }
   }
 }
+
+# Price adjust:
+#a = c("START:")
+for(i in 1:20) { # for each year after build (row)
+  for(j in 1:length(years)) { # for each build year (coloumn)
+    #a = append(a, c(UK.2003.rpi.extended[,1][((i-1)+j+15)]))
+    UK.cash.flow[i,j] = UK.cash.flow[i,j] / UK.2003.rpi.extended[,2][((i-1)+j+15)] * 100
+  }
+  #a = append(a, "###")
+}
+#a # prints the years from the price index that correspond to the years in the cash flow. Just to check whether we are using the correct offset.
+
 
 #####
 # Calculating Net Present Value and correspoding Payment
@@ -208,7 +297,7 @@ DE.PMT.short = DE.PMT[3:22]
 # German rates in pounds instead of euro
 DE.PMT.POUNDS = lapply(DE.PMT.short, function(x){ x/Exchange.rate.GBP } )
 
-pdf(file="fig_expected-average-remuneration.pdf", height=3.5, width=5)
+pdf(file="fig_expected-average-remuneration-priceadjusted.pdf", height=3.5, width=5)
 
 par(mar=c(4,4,1,4)+.3, yaxs='i') # margin, and y-axis start at y=0
 plot(x=years, y=UK.PMT, axes=FALSE, col="gray", type="h", lwd=10, lend="square", xlab="Years", ylab="p/KWh", ylim=range(0,10))
