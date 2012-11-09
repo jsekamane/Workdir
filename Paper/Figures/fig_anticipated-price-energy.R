@@ -1,7 +1,7 @@
 ####################
 #
-#	Title:  Anticipated price of wind energy in Germany and the UK. (1990 - 2006)
-#	Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). EUROSTAT (nrg_113a, nrg_1072)
+#	Title:  Anticipated price of wind energy (1990 - 2010)
+#	Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). EUROSTAT (nrg_113a, nrg_1072). [Previous calculations]
 #	Notes: 
 # Units: p/KWh and c/KWh (in 2003 price)
 # Dependencies: fig_expected-average-remuneration.R (DE.PMT.csv, LT.PMT.csv, UK.PMT.csv).
@@ -36,6 +36,7 @@ Exchange.rate.pfennig =  0.51 # EUR-cent per Pfennig
 DE.FIT.initial.fee = 9.1 # c/KWh. From EEG 2000.
 DE.FIT.basic.fee = 6.17 # c/KWh. From EEG 2000.
 Pool.price.UK = 1.5 # p/KWh. Why not same pool price for NFFO and ROC ???
+Future.inflation.rate = 0.0196 # 1.96% annually. From Butler and Neuhoff calculations. Assumption: ECB target of just below 2%. And identical in all three countries.
 
 # Time range
 years = c(1990:2010)
@@ -52,6 +53,8 @@ colnames(StrEG.cash.flow) = years[1:10]
 # Fixing base years of the indecies
 #####
 
+# We deflate each value in the cash flow, to the price index in the corresponding year. For years after 2011 we assume the same fixed inflation rate for all countries (1.96%)
+
 # This function changes the base of of an index. Required: the new base year, list of years and corresponding list of index values (as old base year).
 SET.BASE.YEAR = function(base.year, list.years, list.index){
   i = match(base.year, list.years) # finds the row number that corresponds to the base.year
@@ -60,14 +63,35 @@ SET.BASE.YEAR = function(base.year, list.years, list.index){
   df # return data frame with years and index.
 }
 
-UK.2010.rpi = SET.BASE.YEAR(2010, data.rpi.UK$X, data.rpi.UK$CHAW)
-DE.2010.rpi = SET.BASE.YEAR(2010, data.rpi.DE$X, data.rpi.DE[,2])
-LT.2010.ppi = SET.BASE.YEAR(2010, data.ppi$X, data.ppi$Lithuania)
-
-# temporary:
 UK.2003.rpi = SET.BASE.YEAR(2003, data.rpi.UK$X, data.rpi.UK$CHAW)
 DE.2003.rpi = SET.BASE.YEAR(2003, data.rpi.DE$X, data.rpi.DE[,2])
-LT.2003.ppi = SET.BASE.YEAR(2003, data.ppi$X, data.ppi$Lithuania)
+
+# Extending the price indecies from 2012-2040, using the fixed inflation rates.
+
+UK.2003.rpi.extended = matrix(NA, ncol = 2, nrow = (nrow(UK.2003.rpi)+(2040-2011)) )
+colnames(UK.2003.rpi.extended) = c("Years", "Index")
+for(i in 1:nrow(UK.2003.rpi.extended)) {
+  if(i <= nrow(UK.2003.rpi)) {
+    UK.2003.rpi.extended[,1][[i]] = UK.2003.rpi[,1][[i]]
+    UK.2003.rpi.extended[,2][[i]] = UK.2003.rpi[,2][[i]]
+  } else {
+    UK.2003.rpi.extended[,1][[i]] = UK.2003.rpi.extended[,1][[i-1]] + 1
+    UK.2003.rpi.extended[,2][[i]] = UK.2003.rpi.extended[,2][[i-1]] * (1+Future.inflation.rate)
+  }
+}
+
+DE.2003.rpi.extended = matrix(NA, ncol = 2, nrow = (nrow(DE.2003.rpi)+(2040-2011)) )
+colnames(DE.2003.rpi.extended) = c("Years", "Index")
+for(i in 1:nrow(DE.2003.rpi.extended)) {
+  if(i <= nrow(DE.2003.rpi)) {
+    DE.2003.rpi.extended[,1][[i]] = DE.2003.rpi[,1][[i]]
+    DE.2003.rpi.extended[,2][[i]] = DE.2003.rpi[,2][[i]]
+  } else {
+    DE.2003.rpi.extended[,1][[i]] = DE.2003.rpi.extended[,1][[i-1]] + 1
+    DE.2003.rpi.extended[,2][[i]] = DE.2003.rpi.extended[,2][[i-1]] * (1+Future.inflation.rate)
+  }
+}
+
 
 
 #####
@@ -95,6 +119,14 @@ for(i in 1:20) { # for each year after build (row)
     
   }
 }
+
+# Price adjust
+for(i in 1:20) { # for each year after build (row)
+  for(j in 2:length(years[1:10])) { # for each build year (coloumn). 
+    StrEG.cash.flow[i,j] = StrEG.cash.flow[i,j] / DE.2003.rpi.extended[,2][((i-1)+(j-1))] * 100
+  }
+}
+
 
 #####
 # NFFO cash flow
@@ -125,6 +157,17 @@ for(i in 1:20) { # for each year after build (row)
   }
 }
 
+# Price adjust
+#a = c("START:")
+for(i in 1:20) { # for each year after build (row)
+  for(j in 1:nrow(data.nffo.prices2)) { # for each build year (coloumn). 
+    y = match(colnames(NFFO.cash.flow)[[j]], UK.2003.rpi.extended[,1]) # finding the offset for each NFFO year
+    #a = append(a, UK.2003.rpi.extended[,1][(i-1)+y])
+    NFFO.cash.flow[i,j] = NFFO.cash.flow[i,j] / UK.2003.rpi.extended[,2][(i-1)+y] * 100
+  }
+  #a = append(a, "###")
+}
+#a
 
 #####
 # Calculating Net Present Value and correspoding Payment
@@ -169,28 +212,6 @@ DE.PMT = rbind(StrEG.PMT.temp, data.DE.PMT)
 
 
 #####
-# Deflating prices (using price index)
-#####
-
-# We deflate the PMT-prices according to the RPI/PPI - instead of defalting the price that are paid each year (e.g. the prices enter into the cash flow) ???
-
-# Merging UK PMT and the UK price index into one table (where the year is similar in both list). And then apply calculations across rows that deflate the price.
-UK.PMT.merge = merge(UK.2003.rpi, UK.PMT, by.x="Years", by.y="Years", sort=FALSE)
-UK.PMT.priceadjusted = cbind(UK.PMT.merge$Years, apply( UK.PMT.merge, 1, function(x){ as.numeric(x[3])/as.numeric(x[2])*100 } )) # p/KWh, RPI price adjusted (2003=100).
-colnames(UK.PMT.priceadjusted) = c("Years", "Price")
-
-# Merging DE PMT and the DE price index into one table (where the year is similar in both list). And then apply calculations across rows that deflate the price.
-DE.PMT.merge = merge(DE.2003.rpi, DE.PMT, by.x="Years", by.y="Years", sort=FALSE)
-DE.PMT.priceadjusted = cbind(DE.PMT.merge$Years, apply( DE.PMT.merge, 1, function(x){ as.numeric(x[3])/as.numeric(x[2])*100 } )) # c/KWh, RPI price adjusted (2003=100).
-colnames(DE.PMT.priceadjusted) = c("Years", "Price")
-
-# Merging LT PMT and the LT price index into one table (where the year is similar in both list). And then apply calculations across rows that deflate the price.
-LT.PMT.merge = merge(LT.2003.ppi, data.LT.PMT, by.x="Years", by.y="X", sort=FALSE)
-LT.PMT.priceadjusted = cbind(LT.PMT.merge[1], apply( LT.PMT.merge, 1, function(x){ as.numeric(x[3])/as.numeric(x[2])*100 } )) # c/KWh, RPI price adjusted (2003=100).
-colnames(LT.PMT.priceadjusted) = c("Years", "Price")
-
-
-#####
 # Scale to UK wind resources
 #####
 
@@ -201,9 +222,9 @@ LT.wind.scalefactor = cbind(data.production$X[2:21], (data.production$Lithuania[
 colnames(LT.wind.scalefactor) = c("Years", "Share")
 
 # Manual restricting time period to 1991-2010 for both lists.
-DE.PMT.priceadjusted.windadjusted = cbind(DE.PMT.priceadjusted[1:20,1], as.numeric(DE.PMT.priceadjusted[1:20,2])*as.numeric(DE.wind.scalefactor[1:20,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
+DE.PMT.windadjusted = cbind(DE.PMT[2:21,1], as.numeric(DE.PMT[2:21,2])*as.numeric(DE.wind.scalefactor[1:20,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
 # Manual restricting time period to 2004-2010 for both lists.
-LT.PMT.priceadjusted.windadjusted = cbind(LT.PMT.priceadjusted[3:9,1], as.numeric(LT.PMT.priceadjusted[3:9,2])*as.numeric(LT.wind.scalefactor[15:20,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
+LT.PMT.windadjusted = cbind(data.LT.PMT[3:9,1], as.numeric(data.LT.PMT[3:9,2])*as.numeric(LT.wind.scalefactor[14:20,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
 
 
 #####
@@ -213,17 +234,17 @@ LT.PMT.priceadjusted.windadjusted = cbind(LT.PMT.priceadjusted[3:9,1], as.numeri
 pdf(file="fig_anticipated-price-energy.pdf", height=3.5, width=5)
 
 par(mar=c(4,4,1,4)+.3, yaxs='i') # margin, and y-axis start at y=0
-plot(x=UK.PMT.priceadjusted[1:14,1], y=UK.PMT.priceadjusted[1:14,2], axes=FALSE, col="gray", type="h", lwd=10, lend="square", xlab="Years", ylab="p/KWh", ylim=range(0,10))
+plot(x=UK.PMT[1:14,1], y=UK.PMT[1:14,2], axes=FALSE, col="gray", type="h", lwd=10, lend="square", xlab="Years", ylab="p/KWh", ylim=range(0,10))
 axis(1, labels=FALSE)
 axis(1, at=years, cex.axis=0.7)
 axis(2)
 par(new=TRUE) # plot the following using the secondary axis: 
-plot(x=c(1990, DE.PMT.priceadjusted[1:20,1]), y=c(NA, DE.PMT.priceadjusted[1:20,2]), type="l", xaxt="n", yaxt="n", xlab="", ylab="", ylim=range(0,10*Exchange.rate.GBP))
-lines(x=DE.PMT.priceadjusted.windadjusted[,1], y=DE.PMT.priceadjusted.windadjusted[,2], lty="dashed", lwd=1)
-lines(x=LT.PMT.priceadjusted[1:9,1], y=LT.PMT.priceadjusted[1:9,2], col="purple")
-lines(x=LT.PMT.priceadjusted.windadjusted[,1], y=LT.PMT.priceadjusted.windadjusted[,2], col="purple", lty="dashed", lwd=1)
+plot(x=c(1990, DE.PMT[2:21,1]), y=c(NA, DE.PMT[2:21,2]), type="l", xaxt="n", yaxt="n", xlab="", ylab="", ylim=range(0,10*Exchange.rate.GBP))
+lines(x=DE.PMT.windadjusted[,1], y=DE.PMT.windadjusted[,2], lty="dashed", lwd=1)
+lines(x=data.LT.PMT[1:9,1], y=data.LT.PMT[1:9,2], col="purple")
+lines(x=LT.PMT.windadjusted[,1], y=LT.PMT.windadjusted[,2], col="purple", lty="dashed", lwd=1)
 axis(4) # add secondary axis
 mtext("c/KWh",side=4,line=3)
-legend("topright", legend=c("UK (p/KWh)","DE (p/KWh)", "DE (c/KWh) (with UK wind)", "LT (c/KWh)", "LT (c/KWh) (with UK wind)"), col=c("grey","black","black","purple","purple"), lty = c(NA,"solid","dashed","solid","dashed"), pch = c(15, NA, NA, NA, NA), lwd=c(20, 1, 1, 1, 1), cex=0.5)
+legend("topright", legend=c("UK (p/KWh)","DE (c/KWh)", "DE (c/KWh) (with UK wind)", "LT (c/KWh)", "LT (c/KWh) (with UK wind)"), col=c("grey","black","black","purple","purple"), lty = c(NA,"solid","dashed","solid","dashed"), pch = c(15, NA, NA, NA, NA), lwd=c(20, 1, 1, 1, 1), cex=0.5)
 
 dev.off()
