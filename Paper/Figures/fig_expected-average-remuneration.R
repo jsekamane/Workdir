@@ -1,7 +1,7 @@
 ####################
 #
 #	Title:  Expected Average Remuneration under the EEG and the ROC. (2002 - 2021)
-# Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). DE: BMU (EEG 2000, section 7. EEG 2004, article 10. EEG 2009, section 20, 29 and 30. EEG 2012, section 20, 29 and 30). Lauber and Mez (2004). LT: Marciukatis (2011), UK: [See previous calculations]
+# Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). DE: BMU (EEG 2000, section 7. EEG 2004, article 10. EEG 2009, section 20, 29 and 30. EEG 2012, section 20, 29 and 30). Lauber and Mez (2004). LT: Marciukatis (2011), Baltpool (2012). UK: [See previous calculations]
 #	Notes: 
 # Units: p/KWh and c/KWh
 # Dependencies: fig_roc-price-compontents.R (ROC.Value.csv)
@@ -20,7 +20,13 @@ Discount.rate = 0.08 # 8%
 Exchange.rate.GBP = 1.5 # GBP/EUR
 Exchange.rate.LTL = 63.7/220 # LTL/EUR. Calculated as 63.7EUR/220LTL. Calculated using the infomation from Marciukatis (2011)
 Pool.price.UK = 3 # p/KWh. This number is missing in Butler and Neuhoff (2008), but by using trial-and-error we found 3, to fits the numbers and graphs presented in Butler and Neuhoff (2008).
-Pool.price.LT = 1.5 # c/KWh. Assumption here ??? same as UK or ?
+# Before the Ignalina NPP was shut down, there was not electricity market in LT, since Ignalina contributed to the majority of electricity production. And as a consequence the "price" paid to nuclear has been very stable for 10 year, LTL 6.58 (2008), 6.11 (2009) ≈ 1.7. (NCC, 2009 and XXXX 20xx)
+# We make the assumption that:
+# - A fixed pool price for all years, correspond the the average of the last three years market data.
+# - BALTPOOL: Last three year average (2010-2012): 157.36 LTL/MWh  ≈ 4.54 c/KWh.
+# - Project developers belevied the the goverments commitment to close down the nuclear power plant no later than 31. december 2009 (European Commission 2008). And that they therefore anticipate the higher market pool price.
+# - Similarly we assume that the market price also take the long term MC ??? into account, and any (evt.) newly constructed nuclear power will not increase the pool price / make it jump.
+Pool.price.LT = 157.36 *Exchange.rate.LTL/10 # c/KWh.
 
 # Time range for build year
 years = c(2002:2021)
@@ -127,16 +133,16 @@ for(i in 1:20) { # for each year after build (row)
   for(j in 1:length(years)) { # for each build year (coloumn)
     
     # 2002-2008
-    if(j == 1) { LT.FIT.initial.fee = 6.37 # c/KWh
+    if(j == 1) { LT.FIT.initial.fee = 220 *Exchange.rate.LTL/10 # c/KWh
       
     # 2009-2012
-    } else if(j == 8) { LT.FIT.initial.fee = 8.69 # c/KWh
+    } else if(j == 8) { LT.FIT.initial.fee = 300 *Exchange.rate.LTL/10 # c/KWh
       
     # 2012-
     # What assumptions should be make ?? Simple average of the three sub-band rates or ???
     } else if(j == 11) { # LT.FIT.initial.fee =
       # simple average of data from http://www.regula.lt in LTL, so also applying exchange rate to get it in euro-cent
-      LT.FIT.initial.fee = mean(c(370, 360, 280))*Exchange.rate.LTL/10
+      LT.FIT.initial.fee = mean(c(370, 360, 280)) *Exchange.rate.LTL/10
     }
     
     # First 12 years: initial fee. Thereafter: pool price.
