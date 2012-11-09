@@ -24,7 +24,7 @@ data.ppi = read.csv("eurostat-sts_inpp_a_producerpriceindex.csv") # index (2005=
 Discount.rate = 0.08 # 8%
 Exchange.rate.GBP = 1.5 # GBP/EUR
 Exchange.rate.LTL = 63.7/220 # LTL/EUR. Calculated as 63.7EUR/220LTL. Calculated using the infomation from Marciukatis (2011)
-Pool.price.UK = 2.79 # p/KWh. From Butler and Neuhoff calculations. They use it from 2025.
+Pool.price.UK = 3 # p/KWh. 2.79 in Butler and Neuhoff calculations, but they use it from 2025.
 # Before the Ignalina NPP was shut down, there was not electricity market in LT, since Ignalina contributed to the majority of electricity production. And as a consequence the "price" paid to nuclear has been very stable for 10 year, LTL 6.58 (2008), 6.11 (2009) ≈ 1.7. (NCC, 2009 and XXXX 20xx)
 # We make the assumption that:
 # - A fixed pool price for all years, correspond the the average of the last three years market data.
