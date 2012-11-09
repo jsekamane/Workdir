@@ -1,9 +1,9 @@
 ####################
 #
 #	Title:  Anticipated price of wind energy in Germany and the UK. (1990 - 2006)
-#	Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). 
+#	Source: Calculations and assumptions: Buttler and Neuhoff (2008, 2004). EUROSTAT (nrg_113a, nrg_1072)
 #	Notes: 
-# Units: p/KWh and c/KWh
+# Units: p/KWh and c/KWh (in 2003 price)
 # Dependencies: fig_expected-average-remuneration.R (DE.PMT.csv, LT.PMT.csv, UK.PMT.csv).
 #
 ####################
@@ -16,6 +16,7 @@ data.DE.PMT = read.csv("DE.PMT.csv") # in c/KWh
 data.LT.PMT = read.csv("LT.PMT.csv") # in c/KWh
 data.UK.PMT = read.csv("UK.PMT.csv") # in p/KWh
 
+# Use lagged values here:
 data.capacity = read.csv("eurostat-nrg_113a_capacity-wind-MW.csv")
 data.production = read.csv("eurostat-nrg_1072_production-wind-GWh.csv") # this is in GWh so late we have to multiply with 1000 to get it in MWh.
 
@@ -194,15 +195,15 @@ colnames(LT.PMT.priceadjusted) = c("Years", "Price")
 #####
 
 # From Butler and Neuhoff (2008): "If, for example, [wind-]output is 20% higher, then the price paid per MWh can be reduced by 20% while maintaining the same revenue stream for the project and creating little additional maintenance costs."
-DE.wind.scalefactor = cbind(data.production$X, (data.production$Germany/data.capacity$Germany*1000) / (data.production$United.Kingdom/data.capacity$United.Kingdom*1000) )
+DE.wind.scalefactor = cbind(data.production$X[2:21], (data.production$Germany[2:21]/data.capacity$Germany[1:20]*1000) / (data.production$United.Kingdom[2:21]/data.capacity$United.Kingdom[1:20]*1000) )
 colnames(DE.wind.scalefactor) = c("Years", "Share")
-LT.wind.scalefactor = cbind(data.production$X, (data.production$Lithuania/data.capacity$Lithuania*1000) / (data.production$United.Kingdom/data.capacity$United.Kingdom*1000) )
+LT.wind.scalefactor = cbind(data.production$X[2:21], (data.production$Lithuania[2:21]/data.capacity$Lithuania[1:20]*1000) / (data.production$United.Kingdom[2:21]/data.capacity$United.Kingdom[1:20]*1000) )
 colnames(LT.wind.scalefactor) = c("Years", "Share")
 
 # Manual restricting time period to 1991-2010 for both lists.
-DE.PMT.priceadjusted.windadjusted = cbind(DE.PMT.priceadjusted[1:20,1], as.numeric(DE.PMT.priceadjusted[1:20,2])*as.numeric(DE.wind.scalefactor[2:21,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
+DE.PMT.priceadjusted.windadjusted = cbind(DE.PMT.priceadjusted[1:20,1], as.numeric(DE.PMT.priceadjusted[1:20,2])*as.numeric(DE.wind.scalefactor[1:20,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
 # Manual restricting time period to 2004-2010 for both lists.
-LT.PMT.priceadjusted.windadjusted = cbind(LT.PMT.priceadjusted[3:9,1], as.numeric(LT.PMT.priceadjusted[3:9,2])*as.numeric(LT.wind.scalefactor[15:21,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
+LT.PMT.priceadjusted.windadjusted = cbind(LT.PMT.priceadjusted[3:9,1], as.numeric(LT.PMT.priceadjusted[3:9,2])*as.numeric(LT.wind.scalefactor[15:20,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
 
 
 #####
