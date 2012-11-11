@@ -223,7 +223,7 @@ colnames(LT.wind.scalefactor) = c("Years", "Share")
 # Manual restricting time period to 1991-2010 for both lists.
 DE.PMT.windadjusted = cbind(DE.PMT[2:21,1], as.numeric(DE.PMT[2:21,2])*as.numeric(DE.wind.scalefactor[1:20,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
 # Manual restricting time period to 2004-2010 for both lists.
-LT.PMT.windadjusted = cbind(data.LT.PMT[3:9,1], as.numeric(data.LT.PMT[3:9,2])*as.numeric(LT.wind.scalefactor[14:20,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
+LT.PMT.windadjusted = cbind(data.LT.PMT[3:9,1], as.numeric(data.LT.PMT[3:9,2])*as.numeric(LT.wind.scalefactor[15:21,2])) # c/KWh, RPI price adjusted (2003=100). And adjusted relative to the higher wind speeds in UK.
 
 
 #####
