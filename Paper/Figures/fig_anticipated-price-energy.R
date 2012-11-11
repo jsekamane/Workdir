@@ -16,7 +16,6 @@ data.DE.PMT = read.csv("DE.PMT.csv") # in c/KWh
 data.LT.PMT = read.csv("LT.PMT.csv") # in c/KWh
 data.UK.PMT = read.csv("UK.PMT.csv") # in p/KWh
 
-# Use lagged values here:
 data.capacity = read.csv("eurostat-nrg_113a_capacity-wind-MW.csv")
 data.production = read.csv("eurostat-nrg_1072_production-wind-GWh.csv") # this is in GWh so late we have to multiply with 1000 to get it in MWh.
 
@@ -216,9 +215,9 @@ DE.PMT = rbind(StrEG.PMT.temp, data.DE.PMT)
 #####
 
 # From Butler and Neuhoff (2008): "If, for example, [wind-]output is 20% higher, then the price paid per MWh can be reduced by 20% while maintaining the same revenue stream for the project and creating little additional maintenance costs."
-DE.wind.scalefactor = cbind(data.production$X[2:21], (data.production$Germany[2:21]/data.capacity$Germany[1:20]*1000) / (data.production$United.Kingdom[2:21]/data.capacity$United.Kingdom[1:20]*1000) )
+DE.wind.scalefactor = cbind(data.production$X, (data.production$Germany/data.capacity$Germany*1000) / (data.production$United.Kingdom/data.capacity$United.Kingdom*1000) )
 colnames(DE.wind.scalefactor) = c("Years", "Share")
-LT.wind.scalefactor = cbind(data.production$X[2:21], (data.production$Lithuania[2:21]/data.capacity$Lithuania[1:20]*1000) / (data.production$United.Kingdom[2:21]/data.capacity$United.Kingdom[1:20]*1000) )
+LT.wind.scalefactor = cbind(data.production$X, (data.production$Lithuania/data.capacity$Lithuania*1000) / (data.production$United.Kingdom/data.capacity$United.Kingdom*1000) )
 colnames(LT.wind.scalefactor) = c("Years", "Share")
 
 # Manual restricting time period to 1991-2010 for both lists.
