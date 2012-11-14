@@ -19,3 +19,9 @@ Thumbs.db
 *.history
 # Folders
 .Rproj.user/
+
+# LaTex files # 
+*.aux
+*.log
+*.toc
+*.synctex.gz
