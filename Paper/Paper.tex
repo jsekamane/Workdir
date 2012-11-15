@@ -3,7 +3,7 @@
 \usepackage{amsmath}
 \usepackage{setspace}
 \onehalfspacing
-\usepackage{csvsimple}
+%\usepackage{csvsimple}
 \usepackage{graphicx}
 \graphicspath{{Figures/}}
 %\usepackage{floatrow}
@@ -15,10 +15,34 @@
 \usepackage{subcaption}
 \usepackage[margin=2.5cm]{geometry}
 
-\usepackage{tabularx}
+\usepackage{array}
+\newcolumntype{L}{>{\centering\arraybackslash}m{2.25cm}}
 
 \usepackage[utf8x]{inputenc}
 \usepackage[L7x]{fontenc}
+
+\usepackage[nottoc,numbib]{tocbibind}
+
+\usepackage{url} % hyperref works too
+\urlstyle{same}
+
+%\usepackage[round]{natbib}
+
+% http://www.jwe.cc/2012/08/latex-and-stata-integration-solving-some-problems/
+\usepackage{threeparttable}% Alternative for Notes below table
+% Note/Source/Text after Tables
+\newcommand{\Figtext}[1]{%
+	\begin{tablenotes}[para,flushleft]
+		%\hspace{6pt}
+		\hangindent=1em
+		\footnotesize
+		\raggedright
+		#1
+	\end{tablenotes}
+}
+\newcommand{\Fignote}[1]{\Figtext{\emph{Note:~}~#1}}
+\newcommand{\Figsource}[1]{\Figtext{\emph{Source:~}~#1}}
+
 
 \begin{document}
 
@@ -43,8 +67,23 @@ In light of this the National Energy Independence Strategy (2012) has put forwar
 To support electricity from renewable energy Lithuania introduced feed-in tariffs in 2002. The feed-in tariffs were revised in 2007 and 2009 to adjust for inflation, and again in 2012 where tariffs were differentiated based on the size of the wind farm. Currently feed-in tariffs are calculated using a fixed formula, where net present value of all discounted cash flows should equal zero after 12 years of support, e.g. a break-even point after 12 years. This formula takes into account the amount of invested capital, expected annual quantities of electricity produced, future operational and service costs and the discount rate. This is adjusted according to the specific technology and size of renewable energy plants. National Control Commision for Prices and Energy also adjusts the discount rate using average interest rate for borrowing and lending, corporate tax rate and the 10-year government bond rate average. However feed-in tariff is not differentiated for different regions to account for discrepancy in wind speeds and is set according to an average wind plant efficiency in the country (Feed-in tariff adjustment law, 2011). In 2010 solar photovoltaic was included in the feed-in tariff system. In addition to feed-in tariffs; renewable electricity producers receive a 40\% discount on connection to the grid and the EU Structural Funds provide support for investments in power plants that generate electricity from renewable sources.
 
 \begin{table}
-	\csvautotabular{Tables/table_production-electricity-2011.csv}
 	\caption{Total gross production of electricity in 2011 in Lithuania}
+	%\csvautotabular{Tables/table_production-electricity-2011.csv}
+	\begin{tabular}{p{7.8cm} r r}  
+		\hline  	
+		 & (GWh) & Share of final consumption (\%) \\
+		\hline   
+		Combined heat and power plant * & 3033.9 & 64.6 \\
+		Hydroelectric plants  & 479.9 & 10.2 \\
+		Hydropower pumped storage  & 575.6 & 12.3 \\
+		Wind turbines & 475 & 10.1 \\
+		Solar plants & 0.1 & 0 \\
+		Other plants ** & 257.1 & 5.5 \\
+		Total gross production & 4821.6 & 102.7 \\
+		\hline   
+	\end{tabular}
+	\Fignote{* In the combined heat and power plant the fuel is oil and gas. ** Electricity produced using energy from chemical processes.}
+	\Figsource{Statistics Lithuania (2012, Table 2.40)}
 	\label{tab:table_production-electricity-2011}
 \end{table}
 
@@ -77,17 +116,20 @@ We will first have a look at development levels, thereafter introduce the respec
 	%	\label{fig:figure_capacity}
 	%\end{subfigure}
 	%~
+	\caption{Development levels}
 	\begin{subfigure}[b]{1\textwidth}
-		\includegraphics[width=1\textwidth]{figure_generation-share2}
 		\caption{Wind power share of final consumption (\%)}
+		\includegraphics[width=1\textwidth]{figure_generation-share2}
 		\label{fig:figure_generation-share2}
 	\end{subfigure}
 	~
 	\begin{subfigure}[b]{1\textwidth}
-		\includegraphics[width=1\textwidth]{fig_growth-potential}
 		\caption{The annual additional capacity growth share of remaining additional mid-term realisable potential (\%)}
+		\includegraphics[width=1\textwidth]{fig_growth-potential}
 		\label{fig:fig_growth-potential}
 	\end{subfigure}
+	\Fignote{Includes both onshore and offshore wind turbines. Sum of main activity producers and autoproducers}
+	\Figsource{Eurostat (nrg\_113a). EWEA (2012)}
 \end{figure}
 % [INSERT FIGURE=figure_capacity.pdf TITLE=Installed wind power capacity 1990-2010 (MW) SOURCE=EUROSTAT (nrg_113a) TIME=1990-2010 NOTE=Includes both onshore and offshore wind turbines. Sum of main activity producers and autoproducers]
 
@@ -98,24 +140,29 @@ We will first have a look at development levels, thereafter introduce the respec
 Both Germany and the UK introduced renewable energy incentive policies around the same time, in 1991 and 1990 respectively. Deployment has been much greater in Germany compared to the UK. In Germany deployment increased steadily after the first national policy was introduced incentivising electricity production from renewable energy sources. The capacity growth rate has stabilized in the last couple of years. Deployment in the UK remained low under the NFFO system and only started to pick up after the RO system was introduced in 2002, but both the NFFO and RO have under-performed with regards to the targets set by government (Dow and Wood 2011, table 2.1). Lithuania has arrived much later at the game. First introducing feed-in tariffs in 2002. Its deployment in absolute terms (MW) has been slower than both Germany and the UK. However the rate at which wind power as percentage of final electricity consumption has increased, has been faster as seen in figure ~\ref{fig:figure_generation-share2} – reaching a 2.7\% share of final consumption in its first 8 years. This is most likely due to catch-up effects: e.g. better technology has been available at the time when Lithuania finally introduced its renewable energy policy. We will use the IEA effectiveness indicator method (IEA 2008) to take account of this, and calculate the annual additional capacity growth rate as a percentage of the remaining additional mid-term realisable potential, were respective 2020 capacity targets for each country has been used\footnote{The equation is $E_t = \frac{G_t - G_{t-1}}{\text{ADDPOT}_t} = \frac{G_t - G_{t-1}}{\text{POT}_{2020} - G_{t-1}}$, where E is the effectiveness indicator, G is capcity in year t, ADDPOT is additional potential in year t until 2020, and $\text{POT}_{2020}$ is capacity potential in year 2020.}.  Doing this we see that the growth rate is largest in Germany and has been stable at an annual growth of 6.5\% of additional potential, the last ten years (figure ~\ref{fig:fig_growth-potential}). While Lithuania and the UK have lower, very similar and continually increasing growth rates. Despite the UK having a 10 year renewable policy head start, and having higher potential in the form of higher average wind speeds as we will see in the following section, its current level of development is similar to the level in Lithuania.
 
 \subsection{Comparing wind speeds and wind resources}
+To accurately compare the costs in Germany, the UK and Lithuania we will adjust costs according to each countries wind resources. Germany is endowed with the lowest wind speeds and therefore its costs of producing one MWh will be higher than the UK and Lithuania. 
+
+Butler and Neuhoff (2004, p. 13) reports that the UK wind speeds at existing wind farms is 7.04 m/s at a height of 25 m, which corresponds to 7.23 m/s at a height 30 m. Wind speeds for Lithuania and the UK have been calculated such that they are comparable to the 30 meter height of the German reference site. Table ~\ref{tab:table_avgwindspeeds} presents the wind speeds\footnote{Wind gradient equation: $\text{V}_h = \text{V}_\text{30m} \cdot \left(\frac{h}{30}\right)^\alpha$ where $\text{V}_\text{30m}$ is the wind speed at a height of 30 meters, $\text{V}_h$ is wind speed at height of $h$ meters, and where  $\alpha$ is the Hellman exponent, that accounts for the terrain and roughness.}.
+
+There is no agreement upon the average wind speed for Lithuania, nor any database containing wind speeds for the existing wind turbines, therefore we present the wind speeds of five sites, and wind speed for the Coastal region. The wind speeds of the three test sites (Vilkyciai, Kretinga, and Tauragè) are the result of the Baltic wind atlas study by RISØ (2003). They furthermore (using data from met-office stations) provide readers with a map approximating how the wind speed decreases as you travel east over Lithuania away from the Baltic sea. Similarly Erlickytė-Marčiukaitienė, Marčiukaitis and Tumosa (2007, p. 27) report wind speeds for the Coastal region, calculated using data from hydrometeorological stations. They also report that the lowest wind speeds are found in the eastern and southeastern parts of Lithuania. Here wind speeds fall below 2.5 m/s at 10 m (corresponding to 2.9 m/s at 30 m). Marčiukatis (2011, p. 4) reports that ``measurements carried out during a number of private wind energy projects have shown even better wind conditions [than the three test sites mentioned above]. Unfortunately, they are confidential and not available for presentation''.
 
 \begin{table}
-	\begin{tabular}{|p{2cm}|p{3cm}|p{2cm}|p{2cm}|p{2cm}|p{3cm}|}
-	  DE & LT & LT & LT & LT & UK \\
-	  Reference site & Average of test sites (Vilkyciai, Kretinga, Tauragè) & Giruliuose & Būtingėje & Coastal region * & Existing wind farms ** \\
-	  5.5 & 6.06 & 5.95 & 6.88 & 7.23 \\
-	\end{tabular}
 	\caption{Comparable average wind speeds at height of 30 m (m/s)}
+	%\csvautotabular{Tables/table_avgwindspeeds.csv}
+	\begin{tabular}{L|L L L L|L}
+		\hline
+		\textbf{DE} & \multicolumn{4}{c|}{\textbf{LT}} & \textbf{UK} \\
+		Reference site & Average of test sites * & Giruliuose & Būtingėje & Coastal region ** & Existing wind farms *** \\
+		\hline
+		5.5 & 6.06 & 5.95 & 6.88 & 6.43 & 7.23 \\
+		\hline
+	\end{tabular}
+	\Fignote{LT and UK wind speeds have been calculated at 30 m using the wind gradient equation with a Hellman exponent of 1/7. * Vilkyciai, Kretinga, and Tauragè. ** Wind speeds from hydrometeorological stations measured at 10 m above ground. *** Wind speeds calculated using the DTI NOABL database.}
+	\Figsource{UK: Butler and Neuhoff (2004, p. 13). DE: IEA (2000, p. 96). LT: Marciukatis (2011), Erlickytė-Marčiukaitienė, Marčiukaitis and Tumosa (2007, p. 27)}
 	\label{tab:table_avgwindspeeds}
 \end{table}
 
 % [INSERT TABLE=table_avgwindspeeds.csv TITLE=Comparable average wind speeds at height of 30 m (m/s) SOURCE=UK: Butler and Neuhoff (2004, p. 13). DE: IEA (2000, p. 96). LT: Marciukatis (2011), Erlickytė-Marčiukaitienė, Marčiukaitis and Tumosa (2007, p. 27) NOTE=LT and UK wind speeds have been calculated at 30 m using the wind gradient equation with a Hellman exponent of 1/7. * Wind speeds from hydrometeorological stations measured at 10 m above ground. ** Wind speeds calculated using the DTI NOABL database.]
-
-To accurately compare the costs in Germany, the UK and Lithuania we will adjust costs according to each countries wind resources. Germany is endowed with the lowest wind speeds and therefore its costs of producing one MWh will be higher than the UK and Lithuania. 
-
-Butler and Neuhoff (2004, p. 13) reports that the UK wind speeds at existing wind farms is 7.04 m/s at a height of 25 m, which corresponds to 7.23 m/s at a height 30 m. Wind speeds for Lithuania and the UK have been calculated such that they are comparable to the 30 meter height of the German reference site. This is presented in table ~\ref{tab:table_avgwindspeeds}\footnote{Wind gradient equation: $\text{V}_h = \text{V}_\text{30m} \cdot \left(\frac{h}{30}\right)^\alpha$ where $\text{V}_\text{30m}$ is the wind speed at a height of 30 meters,, $\text{V}_h$ is wind speed at height of $h$ meters, and where  $\alpha$ is the Hellman exponent, that accounts for the terrain and roughness.}.
-
-There is no agreement upon the average wind speed for Lithuania, nor any database containing wind speeds for the existing wind turbines, therefore we present the wind speeds of five sites, and wind speed for the Coastal region. The wind speeds of the three test sites (Vilkyciai, Kretinga, and Tauragè) are the result of the Baltic wind atlas study by RISØ (2003). They furthermore (using data from met-office stations) provide readers with a map approximating how the wind speed decreases as you travel east over Lithuania away from the Baltic sea. Similarly Erlickytė-Marčiukaitienė, Marčiukaitis and Tumosa (2007, p. 27) report wind speeds for the Coastal region, calculated using data from hydrometeorological stations. They also report that the lowest wind speeds are found in the eastern and southeastern parts of Lithuania. Here wind speeds fall below 2.5 m/s at 10 m (corresponding to 2.9 m/s at 30 m). Marčiukatis (2011, p. 4) reports that ``measurements carried out during a number of private wind energy projects have shown even better wind conditions [than the three test sites mentioned above]. Unfortunately, they are confidential and not available for presentation''.
 
 Power production increases proportional to the wind speed cubed (Danish Wind Industry Association, 2012. Grogg 2005, eq. 2). We can very roughly assume that a UK turbine will approximately achieve 227\% of the output that the same turbine would achieve at the German reference site, while a Lithuanian turbine will achieve 127-196\% of the German reference site\footnote{Calculated as: $\frac{\text{P}}{\text{P}_\text{DE}} = \frac{\frac{1}{2} \cdot A \cdot \rho \cdot \text{V}^3}{\frac{1}{2} \cdot A \cdot \rho \cdot \text{V}_\text{DE}^3} = \left(\frac{\text{V}}{\text{V}_\text{DE}}\right)^3$, where $A$ is area of disk where air flows through, and $\rho > 1$ is density of air. These two parameters are  assumed to be identical in all three countries.}.
 
@@ -123,13 +170,11 @@ It is important to note that neither the NFFO or RO in the UK, nor the feed-in t
 
 \begin{figure}
 	\centering
-	%\begin{floatrow}
-		\includegraphics[width=1\textwidth]{figure_generation-capacity}
-		\caption{Generation from installed capacity lagged one period (MWh/MW)}
-		%\floatfoot{Includes both onshore and offshore wind turbines. Sum of main activity producers and autoproducers}
-		%\figsource{Eurostat (nrg_113a, nrg_1072)}
-		\label{fig:figure_generation-capacity}
-	%\end{floatrow}
+	\caption{Generation from installed capacity (MWh/MW)}
+	\includegraphics[width=1\textwidth]{figure_generation-capacity}
+	\Fignote{Includes both onshore and offshore wind turbines. Sum of main activity producers and autoproducers}
+	\Figsource{Eurostat (nrg\_113a, nrg\_1072)}
+	\label{fig:figure_generation-capacity}
 \end{figure}
 % [INSERT FIGURE=figure_generation-capacity.pdf TITLE=Generation from installed capacity lagged one period (MWh/MW) TIME=1990-2010 SOURCE=Eurostat (nrg_113a, nrg_1072) NOTE=Includes both onshore and offshore wind turbines. Sum of main activity producers and autoproducers]
 
@@ -143,44 +188,49 @@ We will leave development levels and wind resources for now, and concentrate on 
 
 We will now take a closer look at the prices paid for wind energy; first calculating the value of ROC in the UK, thereafter comparing prices across countries taking wind resources into account. Butler and Neuhoff (2008, p. 1855) choose to focus on the cost per kWh of wind energy, rather than on the overall cost of support, since ``the overall cost would also include network expansion costs and balancing costs, to which wind generators in Germany are not exposed, and which can be separated in the UK''. Similarly we will focus on the unit cost, since as mentioned earlier, Lithuania is also constrained by a network capacity (500 MW) and attendant expansion and balancing costs.
 
-\begin{figure}
-	\centering
-	\includegraphics[width=1\textwidth]{figure_roc-price-components}
-	\caption{Components of the Price Paid to Wind Energy under ROC (p/kWh)}
-	\label{fig:figure_roc-price-components}
-\end{figure}
-% [INSERT FIGURE=figure_roc-price-components.pdf TITLE=Components of the Price Paid to Wind Energy under ROC (p/kWh) TIME=2002-2021 SOURCE=… NOTE=… ]
-
 The UK's Tradable Green Certificate are called Renewable Obligation Certificates (ROCs). Energy suppliers have to present a certain number of ROCs each year (11.1\% of total electricity supplied in 2010/2011), this is monitored by Ofgem. ROCs can be bought from renewable energy generators (1 ROC = 1 MWh). The value of ROCs is not simply equivalent to the market price of the traded ROCs, since the RO system also allows suppliers to pay a fixed amount (buy-out price) to Ofgem for each MWh above the requirement, that they have not covered with a Renewable Obligation Certificate. Other factors of the RO system also affect the value of ROCs as we will see below.
 
 When calculating the value of ROCs we will follow the approach first presented by Bauknecht, Connor and Mitchell (2006). This is also the approach taken by Butler and Neuhoff, but we have updated several assumptions to fit the newest projections and price developments. Like them we aim at providing a lower bound of the value of ROCs, since we are optimistic about renewable energies and because we assume that UK investors are conservative in their expectations.
 
 The buy-out price was set at £30/MWh (= 3 p/kWh) in 2002/2003, when the RO system was introduced and it increases annually with the Retail Price Index\footnote{The buy-out price also works as a cap on RO expenditures. It insures that consumers will not pay more than 3 p/kWh on a fixed \% of their electricity (Bauknecht, Connor and Mitchell 2006, p. 300)}. The electricity suppliers have an economic interest in buying renewable energy up to £30/MWh above the market price of conventional electricity. If the electricity price of renewables was above, then suppliers would instead buy conventional electricity from the market, and pay the buy-out price. In line with Butler and Neuhoff we assume that from 2010 the buy-out price falls with technology (0.20 p/kWh annually), see figure ~\ref{fig:figure_roc-price-components}.
 
-The buy-out funds collected each year are redistributed to those suppliers that have met their requirements. These recycled funds further increase the premium above market price, at which suppliers are willing to buy renewable energy, and hence increase the value of ROCs. This is denoted Recycled Green Premium in figure ~\ref{fig:figure_roc-price-components}. Butler and Neuhoff assumed that the UK would meet their renewable energy targets in 2010/2011 and that the recycled green premium thereafter would simply be zero. As noted earlier the UK has consistently under-performed with regards to the targets set by the government. We will instead assume the target will not be meet before 2020, and the premium will fall until then. This seems reasonable given that 71\% of all producers met their target in 2010/2011, up only by 15\%-points in 7 years (Ofgem 2008, table 1. Ofgem 2011, table 1.) 
+\begin{figure}
+	\centering
+	\caption{Components of the Price Paid to Wind Energy under ROC (p/kWh)}
+	\includegraphics[width=1\textwidth]{figure_roc-price-components_gray}
+	\Fignote{Includes both onshore and offshore wind turbines. Sum of main activity producers and autoproducers}
+	\Figsource{Calculations and assumptions: Buttler and Neuhoff (2008, 2004). Data: EUROSTAT (sts\_inppgr\_a, ert\_bil\_eur\_a). Ofgem (2004, p. 23-24. 2008, Table 1-3. 2012, Table 1-3). IFS (2012). NFPA (2012). e-ROC (2012). Defra / DECC (2012, table 4). BlueNext (2012).}
+	\label{fig:figure_roc-price-components}
+\end{figure}
+% [INSERT FIGURE=figure_roc-price-components.pdf TITLE=Components of the Price Paid to Wind Energy under ROC (p/kWh) TIME=2002-2021 SOURCE=… NOTE=… ]
+
+The buy-out funds collected each year are redistributed to those suppliers that have met their requirements. These recycled funds further increase the premium above market price, at which suppliers are willing to buy renewable energy, and hence increase the value of ROCs. This is denoted \emph{Recycled.Green.Premium} in figure ~\ref{fig:figure_roc-price-components}. Butler and Neuhoff assumed that the UK would meet their renewable energy targets in 2010/2011 and that the recycled green premium thereafter would simply be zero. As noted earlier the UK has consistently under-performed with regards to the targets set by the government. We will instead assume the target will not be meet before 2020, and the premium will fall until then. This seems reasonable given that 71\% of all producers met their target in 2010/2011, up only by 15\%-points in 7 years (Ofgem 2008, table 1. Ofgem 2011, table 1.) 
 
 Levy Exemption Certificate (LEC) exempts renewable energy generators from the Climate Change Levy. Butler and Neuhoff assumed this to be fixed at 0.22p/kWh (50\% of the 2007/2008 level). We use the actual rate for the first 10 years and then assume the future rate will remain at 50\% of the 2010/2011 level.
 
 The ROCs are an additional revenue source for renewable energy generators, but like all energy generators the energy they produce is sold to the market and constitutes their primary revenue source. We calculate the energy value as the auction price for wind in the NFPA auction, minus the ROC auction price and the value of LEC\footnote{The auction prices for wind will include the value ROCs and LECs (NFPA 2012).}. In line with Butler and Neuhoff (2008, p. 1857) we assume that the energy value falls with technology (to 1.5p/kWh in 2020), since this is the ``bottom end of the range predicted by the Performance and Innovation Unit''.
 
-In 2005 the European Emission Trading Scheme was introduced. It increases the fossil fuel (opportunity) cost of electricity generation, this is denoted \emph{CO2 prices} in figure ~\ref{fig:figure_roc-price-components}. From 2007 and on, Butler and Neuhoff in their calculations assume a fixed CO2 price of 22.77 €/tCO2, but since then the CO2 price has fallen from a levels around 20 and 22 €/tCO2 (in 2005 and 2008) down to 7.5 €/tCO2 in 2012\footnote{The Committee on Climate Change (2008, p. 149) write that the CO2 prices fell to zero in 2007 due to an oversupply of total permits issued in Phase I. And that the prices fell after 2008 because of expectations regarding the banking arrangements between Phase II and III.}. We will base our assumption on the central case price projection made in the Committee on Climate Change report (2008, p. 162). They set prices at 16 €/tCO2 in 2020, and only slightly lower in 2015. We assume a fixed cost of 16 €/tCO2 this corresponding to a contribution of 1.2 p/kWh each year\footnote{In addition we also assume an exchange rate of 1.5 and a conversion factor of 0.5 corresponding to the latest available level (2010 level).}.
+In 2005 the European Emission Trading Scheme was introduced. It increases the fossil fuel (opportunity) cost of electricity generation, this is denoted \emph{CO2.prices} in figure ~\ref{fig:figure_roc-price-components}. From 2007 and on, Butler and Neuhoff in their calculations assume a fixed CO2 price of 22.77 €/tCO2, but since then the CO2 price has fallen from a levels around 20 and 22 €/tCO2 (in 2005 and 2008) down to 7.5 €/tCO2 in 2012\footnote{The Committee on Climate Change (2008, p. 149) write that the CO2 prices fell to zero in 2007 due to an oversupply of total permits issued in Phase I. And that the prices fell after 2008 because of expectations regarding the banking arrangements between Phase II and III.}. We will base our assumption on the central case price projection made in the Committee on Climate Change report (2008, p. 162). They set prices at 16 €/tCO2 in 2020, and only slightly lower in 2015. We assume a fixed cost of 16 €/tCO2 this corresponding to a contribution of 1.2 p/kWh each year\footnote{In addition we also assume an exchange rate of 1.5 and a conversion factor of 0.5 corresponding to the latest available level (2010 level).}.
 
 By taking advantage of newest available data and updating the assumptions we find that the sum of all ROC components is higher than the value Butler and Neuhoff (2008) found. This of course also leads to the compounded UK prices being considerably higher. The calculation will appear in the coming sections. 
 
 Above we briefly described each ROC component as well as its past and future price developments. The sum of all components gives us an projection of what the ROC value wind producers in the UK can expect in each year until 2021. Using this and the tariff rates from Germany and Lithuania we will be able to make a simple inflation adjusted price comparison for the years 2002-2021 – this is done in the following section. And later extended with the elaborate price comparison were also wind resources are taken into account.
 
-\subsection{Expected average remuneration under the EEG and the RO}
-\begin{figure}
-	\centering
-	\includegraphics[width=1\textwidth]{fig_expected-average-remuneration-priceadjusted}
-	\caption{Expected remuneration level (2002-2021)}
-	\label{fig:fig_expected-average-remuneration-priceadjusted}
-\end{figure}
-% [INSERT FIGURE=fig_expected-average-remuneration-priceadjusted.pdf TITLE=Expected remuneration level (2002-2021). TIME=2002-2021 SOURCE=… NOTE=… ]
+\subsection{Expected average remuneration levels}
 
 In this section we will calculate remuneration levels that are comparable across the three support mechanisms, despite the fact that prices, rates and the length of support differs widely in each system. The procedure is as follows: we will calculate the net present value of a newly build wind turbine for each year from 2002 to 2021. We assume a discount rate of 8\% and payback time of 20 years, e.g. we evaluate the investment by looking at the cash flow in the first 20 years after the turbine has been built. Furthermore before calculating the net present values, we deflate the cash flow with respect to the respective retail price indices (2003=100), producer price index is used in Lithuania, and for the year 2011 and thereafter we assume a constant annual inflation rate of 1.96\% for all three countries in line with the ECB target of just below 2\%. Then we calculate constant annual rates that would yield identical net present values, since this rate or remuneration level for each year will be comparable across the three systems, and takes account of the system differences mentioned above. The results of this procedure is presented in figure ~\ref{fig:fig_expected-average-remuneration-priceadjusted}. We use a fixed GBP-EUR exchange rate of 1.5 in this and next figure.
 
 In the UK we use the value of ROC that we calculated in the previous section. For each year between 2002-2021 we use the corresponding ROC value. For years after 2021 we simply assume a constant value of 3 p/kWh\footnote{Butler and Neuhoff (2008) calculate ROC values until 2024 and assume a constant price of 2.79 p/kWh from 2025 and on.}.
+
+\begin{figure}
+	\centering
+	\caption{Expected remuneration level (2002-2021)}
+	\includegraphics[width=1\textwidth]{fig_expected-average-remuneration-priceadjusted}
+	\Fignote{Price adjusted (2003=100). Assumed fixed annual inflation rate from 2012 in all three countries of 1.96\%.}
+	\Figsource{Calculations and assumptions: Buttler and Neuhoff (2008, 2004). EUROSTAT (sts\_inpp\_a). DE: BMU (EEG 2000, section 7. EEG 2004, article 10. EEG 2009, section 20, 29 and 30. EEG 2012, section 20, 29 and 30). Lauber and Mez (2004). Statistisches Bundesamt (WZ08-47). LT: Marciukatis (2011). Baltpool (2012). UK: Office for National Statistics (MM23). And figure ~\ref{fig:figure_roc-price-components}.}
+	\label{fig:fig_expected-average-remuneration-priceadjusted}
+\end{figure}
+% [INSERT FIGURE=fig_expected-average-remuneration-priceadjusted.pdf TITLE=Expected remuneration level (2002-2021). TIME=2002-2021 SOURCE=… NOTE=… ]
 
 In Germany we assume that wind turbines are located at windy sites and produce at 150\% above the reference site. They are therefore eligible for five years high initial fee followed by 15 years of basic fee. We also apply the degression mechanism of the EEG system. It decreases initial and basic fees for new builds with 1-2\% annually. The EEG system has been revised three times since it was introduced; in 2004, 2009 and 2012 - each revision has adjusted fees and degression rates.
 
@@ -190,12 +240,14 @@ In Lithuania renewable energy producers are guaranteed the feed-in tariff rates 
 
 This simple comparison of remuneration levels reveals that ROC remuneration levels are considerably higher than EEG levels and presumably will remain higher until the mid- to late-2010s. Butler and Neuhoff (2008) estimated ROC remuneration levels that stayed below 7 p/kWh. Our estimates are significantly higher due to the UK not reaching their target levels and therefore the recycled green premium has not yet converged to zero, and due to wind energy auction prices in 2008 being 2 p/kWh higher than their estimate. We also see that the Lithuanian remuneration levels are lower than the German levels, and presumably will remain lower until 2020. This will however depend on the relative future inflation levels – in non-price-adjusted terms the Lithuanian remuneration has been higher than the German since 2009. This simple comparison though insightful, does not take the wind speeds into account. In the next section we will make this adjustments and compare the prices for years 1990-2010.
 
-\subsection{Anticipated price of wind energy in Germany and the UK}
+\subsection{Anticipated price of wind energy}
 
 \begin{figure}
 	\centering
-	\includegraphics[width=1\textwidth]{fig_anticipated-price-energy}
 	\caption{Anticipated price of wind energy (1990-2010)}
+	\includegraphics[width=1\textwidth]{fig_anticipated-price-energy}
+	\Fignote{Price adjusted (2003=100). Assumed fixed annual inflation rate from 2012 in all three countries of 1.96\%.}
+	\Figsource{EUROSTAT (nrg\_113a, nrg\_1072). And figure ~\ref{fig:fig_expected-average-remuneration-priceadjusted}.}
 	\label{fig:fig_anticipated-price-energy}
 \end{figure}
 % [INSERT FIGURE=fig_anticipated-price-energy.pdf TITLE=Anticipated price of wind energy (1990-2010). TIME=1990-2010 SOURCE=… NOTE=… ]
@@ -224,8 +276,9 @@ The overall rating for difficulties encountered during different stages of devel
 
 \begin{figure}
 	\centering
-	\includegraphics[width=1\textwidth]{fig_survey_barriers}
 	\caption{Obstacles to Development: Relative Assessment by Developers}
+	\includegraphics[width=1\textwidth]{fig_survey_barriers}
+	\Figsource{Survey results. Butler and Neuhoff (2008).}
 	\label{fig:fig_survey_barriers}
 \end{figure}
 % [INSERT FIGURE=... TITLE=Obstacles to Development: Relative Assessment by Developers. SOURCE=Survey, Butler and Neuhoff (2008) NOTE=… ]
@@ -245,8 +298,10 @@ The second part of the questionnaire helped us to determine the level of competi
 
 \begin{figure}
 	\centering
-	\includegraphics[width=1\textwidth]{fig_survey_competition}
 	\caption{Relative Competition Between Developers}
+	\includegraphics[width=1\textwidth]{fig_survey_competition}
+	\Fignote{No Lithuanian data for \emph{Land Lease or Purchase} and \emph{Initial Evaluation and Bid Submission}.}
+	\Figsource{Survey data. Butler and Neuhoff (2008)}
 	\label{fig:fig_survey_competition}
 \end{figure}
 % [INSERT FIGURE=... TITLE=Relative Competition Between Developers SOURCE=Survey, Butler and Neuhoff (2008) NOTE=No Lithuanian data for land lease or purchase and initial evaluation and bid submission]
@@ -257,8 +312,9 @@ Developers report low competition between each other, with an average response o
 
 \begin{figure}
 	\centering
-	\includegraphics[width=1\textwidth]{fig_survey_suppliers}
 	\caption{Relative Competition in Wider Market}
+	\includegraphics[width=1\textwidth]{fig_survey_suppliers}
+	\Figsource{Survey data. Butler and Neuhoff (2008)}
 	\label{fig:fig_survey_suppliers}
 \end{figure}
 % [INSERT FIGURE=... TITLE=Relative Competition in Wider Market SOURCE=Survey, Butler and Neuhoff (2008) NOTE=… ]
@@ -300,10 +356,16 @@ We do not believe the new system in Lithuania will suffer from an excessive focu
 \section{Conclusion}
 Our paper investigates the current renewable policy in Lithuania with comparison to Germany and the United Kingdom. We found that Lithuania managed to achieve low costs, similar to Germany and lower than the UK through their feed-in tariff system, contrary to economic theory where you would expect lower prices when producers are exposed to price competition. But since a feed-in tariff system is exempted from price-, volume- and balancing-risks it manages to achieve higher efficiency and lower price. Lithuania experienced relatively fast development of wind energy and quickly caught up to level of development in the UK. However Lithuanian has not yet reached the level of development in Germany. We argue that is attributed as follows: 1) to differences within the feed-in tariff system, such as tariffs differentiated for wind speeds, and differences in support period. 2) and to country specific problems; obtaining finance, lack of long term policy commitments, high inflation, and lack of wind evaluation providers. In closing we can say that Lithuania has had a good and well thought financial support mechanism that reduced costs, but the surrounding ecosystem and external factors have restricted development from reaching even greater levels. We see room for improvement in current legislation and planning procedures, that could lead to higher deployment levels of wind power, and that the new feed-in tariff system will solve some of the current problems, but also increase uncertainty and risks which might lead to higher costs down the road.
 
-\section{References}
-...
+% Print all
+\nocite{*}
 
-\section{Appendix A}
+%Simple test, where i refere to \citet{Baltpool2012} or how about this paper by \citet{Butler2008}. Thats great but \cite*{EWEA2011} is better. It might work better with.
+
+%\bibliographystyle{plainnat}
+\bibliographystyle{apalike-url}
+\bibliography{References3}
+
+\section{Appendix A. German tariff rates}
 % [INSERT PAGE=Feed-in-tariffs-rates.pdf TITLE=The onshore wind power feed-in tariff rates in Germany (1991-2030) SOURCE=BMU (EEG 2000, section 7. EEG 2004, article 10. EEG 2009, section 20, 29 and 30. EEG 2012, section 20, 29 and 30). Lauber and Mez (2004). NOTES=* StrEG: 90\% of sales price. ** EEG 2000: Operation time of prior installation is halved (min. 4 years). After that follow same reduction of rate rules as new installations. *** EEG 2000: Degression from 2002. **** EEG 2012: Small-scale (≤50KW) will recieve initial fee for 20 years.]
 
 \section{Appendix B. Questionnaire}
