@@ -247,6 +247,6 @@ lines(x=data.LT.PMT[1:9,1], y=data.LT.PMT[1:9,2], col="#FF00FF", lwd=2)
 lines(x=LT.PMT.windadjusted[,1], y=LT.PMT.windadjusted[,2], col="#FF00FF", lty="dashed", lwd=2)
 axis(4, cex.axis=0.5, col="#989898") # add secondary axis
 mtext("c/KWh", side=4, line=2, cex=0.7)
-legend("topright", legend=c("UK (p/KWh)","DE (c/KWh)", "DE (c/KWh) (with UK wind)", "LT (c/KWh)", "LT (c/KWh) (with UK wind)"), col=c("grey","black","black","#FF00FF","#FF00FF"), lty = c(NA,"solid","dashed","solid","dashed"), pch = c(15, NA, NA, NA, NA), lwd=c(20, 1, 1, 2, 2), cex=0.7, bty="n")
+legend("topright", legend=c("UK (p/kWh)","Germany (c/kWh)", "Germany (c/kWh) (with UK wind)", "Lithuania (c/kWh)", "Lithuania (c/kWh) (with UK wind)"), col=c("grey","black","black","#FF00FF","#FF00FF"), lty = c(NA,"solid","dashed","solid","dashed"), pch = c(15, NA, NA, NA, NA), lwd=c(20, 1, 1, 2, 2), cex=0.7, bty="n")
 
 dev.off()

@@ -297,7 +297,7 @@ DE.PMT.short = DE.PMT[3:22]
 # German rates in pounds instead of euro
 DE.PMT.POUNDS = lapply(DE.PMT.short, function(x){ x/Exchange.rate.GBP } )
 
-pdf(file="fig_expected-average-remuneration-priceadjusted.pdf", height=3, width=5)
+pdf(file="fig_expected-average-remuneration-priceadjusted.pdf", height=2.5, width=5)
 
 par(mar=c(2,2.5,0,2.6)+.3, yaxs='i') # margin, and y-axis start at y=0
 plot(x=years, y=UK.PMT, axes=FALSE, col="gray", type="h", lwd=10, lend="square", xlab="", ylab="", cex.lab=0.7, ylim=range(0,10))
@@ -313,7 +313,7 @@ box(col="#989898")
 lines(x=years, y=LT.PMT, col="#FF00FF", lwd=2)
 axis(4, cex.axis=0.5, col="#989898") # add secondary axis
 mtext("c/KWh",side=4, line=2, cex=0.7)
-legend("topright", legend=c("UK (p/KWh)","DE (p/KWh)", "DE (c/KWh)", "LT (c/KWh)"), col=c("grey","black", "black","#FF00FF"), lty = c(NA, NA,"solid","solid"), lwd = c(NA, NA, 1, 2), pch = c(15, 4, NA, NA), cex=0.7, bty="n")
+legend("topright", legend=c("UK (p/kWh)","Germany (p/kWh)", "Germany (c/kWh)", "Lithuania (c/kWh)"), col=c("grey","black", "black","#FF00FF"), lty = c(NA, NA,"solid","solid"), lwd = c(NA, NA, 1, 2), pch = c(15, 4, NA, NA), cex=0.7, bty="n")
 
 dev.off()
 

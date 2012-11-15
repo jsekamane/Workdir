@@ -153,7 +153,7 @@ m.ROC.Value = melt(as.data.frame(ROC.Value), measure.vars = 2:6)
 colours = c("#7B3294", "#C2A5CF", "#F7F7F7", "#A6DBA0", "#008837")
 ggplot(m.ROC.Value, aes(x=factor(years), y=value, fill=factor(variable)) ) + 
   geom_bar(position="stack") + 
-  ylab("p/KWh") + 
+  ylab("p/kWh") + 
   xlab("") +
   labs(fill="") +
   coord_cartesian(ylim = c(0, 14)) +
