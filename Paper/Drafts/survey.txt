@@ -1,0 +1,38 @@
+\begin{enumerate}
+  \item [Stages of development] \hfill \\
+Please rank the difficulties encountered at each of the following stages of development (on a scale 0 to 5, with 0 being no difficulties and 5 being severe):
+  \begin{enumerate}
+    \item Site selection
+    \item Obtaining information
+\item Final assessment of wind resource
+\item Overall project planning
+\item Obtaining finance
+\item Planning permission
+\item Connection to the grid
+Please specify any particular difficulties associated with the stages identified above.
+  \end{enumerate}
+  \item [Competition] \hfill \\
+Please rate the level of competition with other developers (on a scale of 0-5, with 0 being no competition and 5 being severe):
+\begin{enumerate}
+\item Operate
+\end{enumerate}
+\begin{enumerate}
+\item What do you perceive to be a level of competition between firms offering the following services (on a scale of 0-5)?
+\begin{enumerate}
+\item Wind evaluation/planning process
+\item Turbine manufacturers
+\item Finance provision
+\item Construction
+end{enumerate}
+begin{enumerate}
+\item What was your source of financing?
+end{enumerate}
+begin{enumerate}
+\item What do you perceive to be the key risks or uncertainties involved with the development of wind installation?
+end{enumerate}
+begin{enumerate}
+\item Did the support given under the policy provide adequate insurance against these risks?
+end{enumerate}
+begin{enumerate}
+\item What advantages or disadvantages do you see in the upcoming policy?
+end{enumerate}
