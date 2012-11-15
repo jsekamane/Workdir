@@ -230,20 +230,23 @@ LT.PMT.windadjusted = cbind(data.LT.PMT[3:9,1], as.numeric(data.LT.PMT[3:9,2])*a
 # Plotting
 #####
 
-pdf(file="fig_anticipated-price-energy.pdf", height=3.5, width=5)
+pdf(file="fig_anticipated-price-energy.pdf", height=3, width=5)
 
-par(mar=c(4,4,1,4)+.3, yaxs='i') # margin, and y-axis start at y=0
-plot(x=UK.PMT[1:14,1], y=UK.PMT[1:14,2], axes=FALSE, col="gray", type="h", lwd=10, lend="square", xlab="Years", ylab="p/KWh", ylim=range(0,10))
-axis(1, labels=FALSE)
-axis(1, at=years, cex.axis=0.7)
-axis(2)
+par(mar=c(2,2.5,0,2.6)+.3, yaxs='i') # margin, and y-axis start at y=0
+plot(x=UK.PMT[1:14,1], y=UK.PMT[1:14,2], axes=FALSE, col="gray", type="h", lwd=10, lend="square", xlab="", ylab="", ylim=range(0,10))
+abline(h=c(0,2,4,6,8,10), col="#D9D9D9", lwd=0.3)
+mtext("p/KWh",side=2, line=2, cex=0.7)
+axis(1, labels=FALSE, col="#989898")
+axis(1, at=years, cex.axis=0.5, col="#989898")
+axis(2, cex.axis=0.5, col="#989898")
 par(new=TRUE) # plot the following using the secondary axis: 
-plot(x=c(1990, DE.PMT[2:21,1]), y=c(NA, DE.PMT[2:21,2]), type="l", xaxt="n", yaxt="n", xlab="", ylab="", ylim=range(0,10*Exchange.rate.GBP))
+plot(x=c(1990, DE.PMT[2:21,1]), y=c(NA, DE.PMT[2:21,2]), axes=FALSE, type="l", xaxt="n", yaxt="n", xlab="", ylab="", ylim=range(0,10*Exchange.rate.GBP))
+box(col="#989898")
 lines(x=DE.PMT.windadjusted[,1], y=DE.PMT.windadjusted[,2], lty="dashed", lwd=1)
-lines(x=data.LT.PMT[1:9,1], y=data.LT.PMT[1:9,2], col="purple")
-lines(x=LT.PMT.windadjusted[,1], y=LT.PMT.windadjusted[,2], col="purple", lty="dashed", lwd=1)
-axis(4) # add secondary axis
-mtext("c/KWh",side=4,line=3)
-legend("topright", legend=c("UK (p/KWh)","DE (c/KWh)", "DE (c/KWh) (with UK wind)", "LT (c/KWh)", "LT (c/KWh) (with UK wind)"), col=c("grey","black","black","purple","purple"), lty = c(NA,"solid","dashed","solid","dashed"), pch = c(15, NA, NA, NA, NA), lwd=c(20, 1, 1, 1, 1), cex=0.5)
+lines(x=data.LT.PMT[1:9,1], y=data.LT.PMT[1:9,2], col="#FF00FF", lwd=2)
+lines(x=LT.PMT.windadjusted[,1], y=LT.PMT.windadjusted[,2], col="#FF00FF", lty="dashed", lwd=2)
+axis(4, cex.axis=0.5, col="#989898") # add secondary axis
+mtext("c/KWh", side=4, line=2, cex=0.7)
+legend("topright", legend=c("UK (p/KWh)","DE (c/KWh)", "DE (c/KWh) (with UK wind)", "LT (c/KWh)", "LT (c/KWh) (with UK wind)"), col=c("grey","black","black","#FF00FF","#FF00FF"), lty = c(NA,"solid","dashed","solid","dashed"), pch = c(15, NA, NA, NA, NA), lwd=c(20, 1, 1, 2, 2), cex=0.7, bty="n")
 
 dev.off()

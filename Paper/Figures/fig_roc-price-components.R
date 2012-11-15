@@ -150,15 +150,24 @@ m.ROC.Value = melt(as.data.frame(ROC.Value), measure.vars = 2:6)
 #colnames(m.ROC.Value) = c("id", "variable", "value", "years")
 
 # Plot stacked barplot
+colours = c("#7B3294", "#C2A5CF", "#F7F7F7", "#A6DBA0", "#008837")
 ggplot(m.ROC.Value, aes(x=factor(years), y=value, fill=factor(variable)) ) + 
   geom_bar(position="stack") + 
   ylab("p/KWh") + 
-  xlab("Years") +
-  labs(fill="", title="Components of the Price Paid to Wind Energy under ROC (2002 - 2021)") +
+  xlab("") +
+  labs(fill="") +
   coord_cartesian(ylim = c(0, 14)) +
   scale_y_continuous(breaks=c(0,2,4,6,8,10,12,14)) +
   theme_bw() +
-  theme(legend.position="top")
+  #scale_fill_grey() +
+  scale_fill_manual(values=colours) +
+  theme(
+    legend.position="top",
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.line=element_line(),
+    panel.border=element_blank()
+  )
   #theme(axis.text.x = element_text(size = 8))
 ggsave("figure_roc-price-components.pdf")
 

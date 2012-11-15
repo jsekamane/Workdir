@@ -297,20 +297,23 @@ DE.PMT.short = DE.PMT[3:22]
 # German rates in pounds instead of euro
 DE.PMT.POUNDS = lapply(DE.PMT.short, function(x){ x/Exchange.rate.GBP } )
 
-pdf(file="fig_expected-average-remuneration-priceadjusted.pdf", height=3.5, width=5)
+pdf(file="fig_expected-average-remuneration-priceadjusted.pdf", height=3, width=5)
 
-par(mar=c(4,4,1,4)+.3, yaxs='i') # margin, and y-axis start at y=0
-plot(x=years, y=UK.PMT, axes=FALSE, col="gray", type="h", lwd=10, lend="square", xlab="Years", ylab="p/KWh", ylim=range(0,10))
-axis(1, labels=FALSE)
-axis(1, at=years, cex.axis=0.7)
-axis(2)
+par(mar=c(2,2.5,0,2.6)+.3, yaxs='i') # margin, and y-axis start at y=0
+plot(x=years, y=UK.PMT, axes=FALSE, col="gray", type="h", lwd=10, lend="square", xlab="", ylab="", cex.lab=0.7, ylim=range(0,10))
+abline(h=c(0,2,4,6,8,10), col="#D9D9D9", lwd=0.3)
+mtext("p/KWh",side=2, line=2, cex=0.7)
+axis(1, labels=FALSE, col="#989898")
+axis(1, at=years, cex.axis=0.5, col="#989898")
+axis(2, cex.axis=0.5, col="#989898")
 points(x=years, y=DE.PMT.POUNDS, pch=4)
 par(new=TRUE) # plot the following using the secondary axis: 
-plot(x=years, y=DE.PMT.short, type="l", xaxt="n", yaxt="n", xlab="", ylab="", ylim=range(0,10*Exchange.rate.GBP))
-lines(x=years, y=LT.PMT, col="purple")
-axis(4) # add secondary axis
-mtext("c/KWh",side=4,line=3)
-legend("topright", legend=c("UK (p/KWh)","DE (p/KWh)", "DE (c/KWh)", "LT (c/KWh)"), col=c("grey","black", "black","purple"), lty = c(NA, NA,"solid","solid"), pch = c(15, 4, NA, NA), lwd=c(20, 1, 1, 1), cex=0.5)
+plot(x=years, y=DE.PMT.short, axes=FALSE, type="l", xaxt="n", yaxt="n", xlab="", ylab="", ylim=range(0,10*Exchange.rate.GBP))
+box(col="#989898")
+lines(x=years, y=LT.PMT, col="#FF00FF", lwd=2)
+axis(4, cex.axis=0.5, col="#989898") # add secondary axis
+mtext("c/KWh",side=4, line=2, cex=0.7)
+legend("topright", legend=c("UK (p/KWh)","DE (p/KWh)", "DE (c/KWh)", "LT (c/KWh)"), col=c("grey","black", "black","#FF00FF"), lty = c(NA, NA,"solid","solid"), lwd = c(NA, NA, 1, 2), pch = c(15, 4, NA, NA), cex=0.7, bty="n")
 
 dev.off()
 
